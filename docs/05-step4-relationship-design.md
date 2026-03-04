@@ -2,21 +2,21 @@
 
 **Type:** Automated (with optional Q/A)  
 **Prerequisite:** Step 3 completed  
-**Target Schema:** `stage`
+**Target Schema:** `${REDSHIFT_SCHEMA_OUTPUT}` (staging layer)
 
 ---
 
 ## Objective
 
-Define all relationships between the staging tables created in Step 3, specifying join columns and cardinality, using the **keys and roles inferred in Step 2** and the physical columns created in Step 3.
+Define all relationships between the tables in the `${REDSHIFT_SCHEMA_OUTPUT}` schema (staging layer) created in Step 3, specifying join columns and cardinality, using the **keys and roles inferred in Step 2** and the physical columns created in Step 3.
 
-Do not invent relationships beyond what is implied by the Step 2 PK/FK definitions and actual `stage` table schemas.
+Do not invent relationships beyond what is implied by the Step 2 PK/FK definitions and actual `${REDSHIFT_SCHEMA_OUTPUT}` table schemas.
 
 ## Actions
 
 1. **Identify relationship candidates**
    - Start from the Step 2 structured output (PK/FK definitions).
-   - Verify that all referenced columns exist in the `stage` schema tables defined in Step 3.
+   - Verify that all referenced columns exist in the `${REDSHIFT_SCHEMA_OUTPUT}` schema tables defined in Step 3.
 
 2. **Specify each relationship**
    - For each PK/FK pair:
@@ -47,7 +47,7 @@ Return a concise relationship map table:
 
 ## Completion Criteria
 
-- All relationships defined between staging tables
+- All relationships defined between tables in the `${REDSHIFT_SCHEMA_OUTPUT}` schema (staging layer)
 - No ambiguous or circular paths
 - Cardinality and join columns documented
 - Summary provided to user

@@ -46,8 +46,8 @@ Validate the complete semantic model for correctness and save the final PBIX fil
 
 | Section | Details |
 |---|---|
-| **Fact tables** in Redshift `stage` schema | (list) |
-| **Dimension tables** in Redshift `stage` schema | (list) |
+| **Fact tables** in Redshift `${REDSHIFT_SCHEMA_OUTPUT}` schema | (list) |
+| **Dimension tables** in Redshift `${REDSHIFT_SCHEMA_OUTPUT}` schema | (list) |
 | **Relationships** | From → To \| Columns \| Cardinality \| Filter Direction |
 | **Measures** created in Power BI | (list) |
 | **PBIX file** | Saved at `${POWERBI_PBIX_PATH}` |
