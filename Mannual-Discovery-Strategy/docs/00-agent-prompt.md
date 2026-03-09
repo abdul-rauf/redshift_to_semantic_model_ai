@@ -1,4 +1,4 @@
-# Agent Prompt – Role, Rules & Credentials
+# Agent Prompt – Manual Discovery Strategy (Step 0 — Role, Rules & Credentials)
 
 ## Role
 
