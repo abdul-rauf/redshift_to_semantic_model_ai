@@ -3,44 +3,34 @@ _Auto-generated. Append only. Do not edit manually._
 
 ### Step Summary Log
 
-1. [INIT:read-erd]          Read erd.json | source tables metadata loaded
-2. [INIT:read-eda]          Read eda.json | EDA profiling flags noted
-3. [INIT:read-columns]      Read redshift_schema_columns.csv | target tables and columns loaded
-4. [INIT:read-dimatrix]     Read redshift_schema_dimatrix.csv | fact-dim relationships loaded
-5. [INIT:read-config]       Read config.json | schemas and settings loaded
-6. [INIT:domain-plan]       Domain plan presented | awaiting user confirmation
-7. [INIT:confirmed]         Domain plan confirmed | proceeding to SQL generation
-8. [INIT:schema]            CREATE SCHEMA written | newmodel2
-45. [Web:dim-ddl]             dim_web_sessions/pageviews/page DDL written | 3 tables
-46. [Web:fact-ddl]            fact_web_sessions/pageviews DDL written | 2 tables
-47. [Web:dim-insert]          dim_web_sessions/pageviews/page INSERT written | WHERE 1=0 placeholders
-48. [Web:fact-insert]         fact_web_sessions/pageviews INSERT written | WHERE 1=0 placeholders
-49. [Web:done]                Domain complete | 5 DDL + 5 INSERT → star_schema_full.sql
-40. [Email:dim-ddl]         dim_email and email status dims DDL written | 5 tables
-41. [Email:fact-ddl]        email sends/opens/clicks/summaries facts DDL written | 4 tables
-42. [Email:dim-insert]      dim_email and email status dims INSERT written | WHERE 1=0 placeholders
-43. [Email:fact-insert]     email sends/opens/clicks/summaries facts INSERT written | WHERE 1=0 placeholders
-44. [Email:done]            Domain complete | 9 DDL + 9 INSERT → star_schema_full.sql
-35. [Sales:dim-ddl]           dim_sales_orders, dim_sales_lines DDL written | 2 tables
-36. [Sales:fact-ddl]          fact_sales_orders, fact_sales_lines DDL written | 2 tables
-22. [Events:fact-insert]     fact_event_registrations INSERT written | WHERE 1=0 unmapped placeholder
-23. [Events:fact-insert]     fact_event_sessions INSERT written | WHERE 1=0 unmapped placeholder
-24. [Events:fact-insert]     fact_event_purchases INSERT written | WHERE 1=0 unmapped placeholder
-25. [Events:fact-insert]     fact_event_exhibits INSERT written | WHERE 1=0 unmapped placeholder
-26. [Events:fact-insert]     fact_event_exhibit_purchases INSERT written | WHERE 1=0 unmapped placeholder
-27. [Events:done]            Domain complete | 11 DDL + 11 INSERT → star_schema_full.sql
-9. [Customers & Organizations:dim-ddl] dim_individual, dim_company DDL written | 2 tables
-10. [Customers & Organizations:dim-ddl] membership/product/activity dims DDL written | 7 tables
-11. [Customers & Organizations:fact-ddl] membership/chapter/activity facts DDL written | 3 tables
-12. [Customers & Organizations:dim-insert] dim_individual INSERT written | WARNING: low modeling_readiness
-13. [Customers & Organizations:dim-insert] dim_company INSERT written | WARNING: low modeling_readiness
-14. [Customers & Organizations:dim-insert] dim_membership_type INSERT written | derived entity flag
-15. [Customers & Organizations:dim-insert] dim_product INSERT written | TODOs for name/type/status
-16. [Customers & Organizations:dim-insert] activity/geography/date dims INSERT written | mix of derived and TODO
-17. [Customers & Organizations:fact-insert] membership/chapter facts INSERT written | WHERE 1=0 unmapped placeholder
-18. [Customers & Organizations:fact-insert] fact_activities INSERT written | 1 row per activity log
-19. [Customers & Organizations:done]      Domain complete | 10 DDL + 9 INSERT → star_schema_full.sql
-20. [Events:dim-ddl]         dim_event and event status dims DDL written | 6 tables
-21. [Events:fact-ddl]        event registration/session/purchase/exhibit facts DDL written | 5 tables
-7. [INIT:confirmed]         Domain plan confirmed | proceeding to SQL generation
-8. [INIT:schema]            CREATE SCHEMA written | newmodel2
+1. [INIT:read-erd] Read erd.json | 121 source tables identified
+2. [INIT:read-eda] Read eda.json | 121 tables profiled
+3. [INIT:read-columns] Read redshift_schema_columns.csv | target tables loaded
+4. [INIT:read-dimatrix] Read redshift_schema_dimatrix.csv | relationships loaded
+5. [INIT:read-config] Read config.json | output_schema=newmodel3 source_schema=source
+6. [INIT:domain-plan] Domain plan presented | 8 domains identified
+7. [INIT:confirmed] Domain plan confirmed | proceeding to SQL generation
+8. [INIT:schema] CREATE SCHEMA written | newmodel3
+9. [Membership & Customers:read-inputs] Source tables scanned | key CRM and membership tables
+10. [Membership & Customers:dim-ddl] dim_individual, dim_company, dim_membership_type, dim_memberships, dim_chapter, dim_geography, dim_date, dim_month, dim_year DDL written | 9 tables
+11. [Membership & Customers:fact-ddl] fact_memberships, fact_chapter_memberships DDL written | 2 tables
+12. [Membership & Customers:fact-insert] fact_memberships, fact_chapter_memberships INSERT written | keys unresolved, TODOs noted
+13. [Events & Registrations:dim-ddl] dim_product, dim_event, dim_location, dim_time DDL written | 4 tables
+14. [Events & Registrations:fact-ddl] fact_event_registrations, fact_event_sessions, fact_event_purchases DDL written | 3 tables
+15. [Events & Registrations:fact-insert] Event facts INSERT skeletons written | WHERE 1=0, TODO mappings
+16. [Commerce & Sales Orders:read-inputs] Source tables scanned | accounting orders and line items
+17. [Commerce & Sales Orders:dim-ddl] dim_sales_lines, dim_sales_orders DDL written | 2 tables
+18. [Commerce & Sales Orders:fact-ddl] fact_sales_orders, fact_sales_lines DDL written | 2 tables
+19. [Commerce & Sales Orders:fact-insert] Sales facts INSERT skeletons written | WHERE 1=0, TODO mappings
+20. [Email Marketing:dim-ddl] Email-related dimensions DDL written | 7 tables
+21. [Email Marketing:fact-ddl] Email fact tables DDL written | 4 tables
+22. [Email Marketing:fact-insert] Email facts INSERT skeletons written | WHERE 1=0, TODO mappings
+23. [Community:dim-ddl] Community dimensions DDL written | 5 tables
+24. [Community:fact-ddl] Community fact tables DDL written | 4 tables
+25. [Community:fact-insert] Community facts INSERT skeletons written | WHERE 1=0, TODO mappings
+26. [Sponsorships & Exhibits:dim-ddl] Sponsorship/exhibit dimensions DDL written | 5 tables
+27. [Sponsorships & Exhibits:fact-ddl] Sponsorship/exhibit facts DDL written | 3 tables
+28. [Sponsorships & Exhibits:fact-insert] Sponsorship/exhibit INSERT skeletons written | WHERE 1=0, TODO mappings
+29. [Web & Activities:dim-ddl] Web and activity dimensions DDL written | 5 tables
+30. [Web & Activities:fact-ddl] Web and activity facts DDL written | 3 tables
+31. [Web & Activities:fact-insert] Web and activity INSERT skeletons written | WHERE 1=0, TODO mappings
