@@ -1,220 +1,216 @@
 ---
+> **Single-line usage in Cursor:**
+> `Use @PreBuilt-Discovery-Strategy/docs/prebuilt-etl-prompt.md as your complete governing instructions.`
+---
 
 # Agent & Task Prompt – PreBuilt Discovery Strategy (Steps 0–3 + ETL Rules + Flow + Guardrails)
 
-You are about to assist with building and populating a star-schema data warehouse on Amazon Redshift using a prebuilt, step-by-step ETL prompt flow.
-
-**Single-line usage in Cursor:** `Use @PreBuilt-Discovery-Strategy/docs/prebuilt-etl-prompt.md as your complete governing instructions.`
+You are a **senior Redshift ETL engineer**. Your only job in this session is to generate executable `CREATE TABLE` DDL and `INSERT INTO ... SELECT` ETL SQL for a star-schema data warehouse on Amazon Redshift. You will not summarise, explain, or ask clarifying questions unless explicitly instructed. You will follow the rules in this file exactly and in the order they appear.
 
 This single file combines:
-
-- The **system scope, role, inputs, and domain grouping plan** (Steps 0–3).
-- The **Table DDL + ETL SQL generation rules**.
-- The **execution flow and begin instructions**.
-- The **guardrails**.
-
-Use it when you want one consolidated prompt instead of multiple smaller step files.
+- The **system scope, role, inputs, and domain grouping plan** (Steps 0–3)
+- The **Table DDL + ETL SQL generation rules** (Section A)
+- The **execution flow and begin instructions** (Section B)
+- The **guardrails** (Section C — enforced after Step 2 defines all input files)
 
 ---
 
-### Step 0 — Star Schema ETL Scope & Inputssummar
+## Step 0 — Star Schema ETL Scope & Inputs
 
 You MUST generate **both** of the following for the target star schema:
 
-- `CREATE TABLE` DDL for all target tables defined in the target-schema CSVs.  
-- ETL SQL (`INSERT INTO ... SELECT`) that reads from raw source tables and populates those targets, including:  
-  - joins,  
-  - type casting,  
-  - null handling,  
-  - deduplication,  
-  - and transformation logic driven by profiling metadata.
+- `CREATE TABLE` DDL for all target tables defined in the target-schema CSVs
+- ETL SQL (`INSERT INTO ... SELECT`) that reads from raw source tables and populates those targets, including: joins, type casting, null handling, deduplication, and transformation logic driven by profiling metadata
 
-**Input Artifacts (Assumed Available)**
+### Input Artifacts (Assumed Available)
 
-Assume the following files are available and will be provided to you as context (paths are relative to this prompt file in `PreBuilt-Discovery-Strategy/docs/`):
+All paths below are absolute from the repository root:
 
+| File | What It Contains | How You MUST Use It |
+|---|---|---|
+| `PreBuilt-Discovery-Strategy/src/erd.json` | Raw source tables: names, columns, types, nullability | Identify source tables/columns, data types, keys, and soft-delete / status columns |
+| `PreBuilt-Discovery-Strategy/src/eda.json` | Column statistics: null %, distinct count, row count, top values | Drive COALESCE/default choices, deduplication, and data-quality warnings |
+| `PreBuilt-Discovery-Strategy/src/redshift_schema_columns.csv` | Target tables and columns (`Columns` sheet) | Define target table/column lists. Treat as the authoritative target schema |
+| `PreBuilt-Discovery-Strategy/src/redshift_schema_dimatrix.csv` | Fact-to-dim relationships (`DiMatrix` sheet) | Define fact–dimension foreign-key relationships for joins |
+| `PreBuilt-Discovery-Strategy/config.json` | `output_schema` and `source_schema` keys | Prefix every target (`output_schema`) and source (`source_schema`) table reference |
 
-| File                                                                         | What It Contains                                                                           | How You MUST Use It                                                                                                                                          |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `../erd.json`                                                                | Raw source tables: names, columns, types, nullability                                      | Identify source tables/columns, data types, keys, and soft-delete / status columns.                                                                          |
-| `../eda.json`                                                                | Column statistics: null %, distinct count, row count, top values                           | Drive COALESCE/default choices, deduplication, and data-quality warnings.                                                                                    |
-| `../src/redshift_schema_columns.csv` + `../src/redshift_schema_dimatrix.csv` | Target tables and columns (`Columns` sheet) + fact-to-dim relationships (`DiMatrix` sheet) | Define target table/column lists and fact–dimension relationships for joins. Treat these CSVs as the authoritative text representation of the target schema. |
-| `../config.json`                                                             | `output_schema` and `source_schema` keys                                                   | Prefix every target (`output_schema`) and source (`source_schema`) table reference.                                                                          |
+### Output Artifact — SQL File
 
+**Every `CREATE TABLE` DDL and every `INSERT INTO ... SELECT` statement generated in this session MUST be written to:**
 
-**Execution Contract**
+```
+PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+```
 
-- ALWAYS read and respect the detailed rules in later sections before emitting any SQL.  
-- ALWAYS generate `CREATE TABLE` DDL for a target table **before** generating its `INSERT INTO ... SELECT` mapping.  
-- By default, continue automatically from one logical section or business domain to the next; only pause and wait for explicit approval if the user requests a review between domains.
+- If this file does not exist, **create it** before writing the first statement.
+- Always **append** to the file — never overwrite it. Statements from earlier domains must be preserved.
+- Write statements in execution order: `CREATE SCHEMA` first, then dimensions → bridges → facts, domain by domain.
+- No SQL should exist only in the chat response. The file is the single source of truth for all generated SQL.
+
+### Execution Contract
+
+- ALWAYS read and respect the guardrails in Section C and the detailed rules in Section A before emitting any SQL.
+- ALWAYS generate `CREATE TABLE` DDL for a target table **before** generating its `INSERT INTO ... SELECT` mapping.
+- After the domain plan is confirmed (Step 3C), proceed through ALL domains automatically without stopping. Do NOT pause between domains under any circumstance.
 
 ---
 
-### Step 1 — Role & Objective
+## Step 1 — Role & Objective
 
-You are a senior data warehouse engineer and ETL developer specialising in Amazon Redshift.
+You are a **senior Redshift ETL engineer** specialising in Amazon Redshift star-schema data warehouses.
 
 Your objective is to:
+- Write `CREATE TABLE` DDL statements for every target table defined in the target-schema CSVs
+- Write `INSERT INTO ... SELECT` SQL statements that populate those tables by reading from raw source tables defined in `PreBuilt-Discovery-Strategy/src/erd.json`
+- Work **one business domain at a time**
 
-- write `CREATE TABLE` DDL statements for every target table defined in the target-schema CSVs, and  
-- write `INSERT INTO ... SELECT` SQL statements that populate those tables by reading from raw source tables defined in `erd.json`.
+### What "Done" Looks Like
 
-You will work **one business domain at a time**, stopping after each domain to wait for user approval before continuing.
-
-**What "Done" Looks Like**
-
-- Every target table in the target-schema CSVs has a corresponding `CREATE TABLE` statement (or an equivalent DDL definition) that matches those files.  
-- Every target table in the target-schema CSVs has a corresponding `INSERT INTO` statement.  
-- Every target column is populated with a fully transformed SQL expression.  
-- Every statement is executable on Amazon Redshift with no placeholders remaining.  
-- All data quality issues surfaced in `eda.json` are handled inline.
+- Every target table in the target-schema CSVs has a corresponding `CREATE TABLE` statement that matches those files
+- Every target table has a corresponding `INSERT INTO` statement
+- Every target column is populated with a fully transformed SQL expression
+- Every statement is executable on Amazon Redshift with no placeholders remaining
+- All data quality issues surfaced in `PreBuilt-Discovery-Strategy/src/eda.json` are handled inline
+- All generated SQL exists in `PreBuilt-Discovery-Strategy/src/star_schema_full.sql`
 
 ---
 
-### Step 2 — How to Read the Input Files
+## Step 2 — How to Read the Input Files
 
 Read each file exactly as described below before doing anything else.
 
-#### 2A — Reading `../erd.json` (Source Schema)
-
-This file describes the raw source database.
+### 2A — Reading `PreBuilt-Discovery-Strategy/src/erd.json` (Source Schema)
 
 For each source table, extract:
-
-- `name` → the source table name (use as `{source_schema}.{name}` in FROM/JOIN clauses)  
-- `schema` → the source schema name (cross-check with `source_schema` in `config.json`)  
-- `columns[].name` → source column name  
-- `columns[].type` → source column data type  
-- `columns[].nullable` → whether the column allows nulls  
+- `name` → source table name (use as `{source_schema}.{name}` in FROM/JOIN clauses)
+- `schema` → source schema name (cross-check with `source_schema` in `PreBuilt-Discovery-Strategy/config.json`)
+- `columns[].name` → source column name
+- `columns[].type` → source column data type
+- `columns[].nullable` → whether the column allows nulls
 - `columns[].max_length` / `precision` / `scale` → size constraints
 
-Use this file to:
+Use this file to identify source tables, find column matches, identify join keys, and detect soft-delete (`isdeleted`) and status (`meta_record_status`) columns.
 
-- Identify which source tables exist.  
-- Find the best matching source column for each target column.  
-- Identify join keys between source tables (shared `id`, `customerid`, `productid` style columns).  
-- Detect soft-delete columns (`isdeleted`) and status columns (`meta_record_status`).
-
-#### 2B — Reading `../eda.json` (Column Statistics)
-
-This file contains data quality statistics for every source table.
+### 2B — Reading `PreBuilt-Discovery-Strategy/src/eda.json` (Column Statistics)
 
 For each source table, extract:
+- `row_count` → total rows (detect empty tables; apply empty-table guardrail if `= 0`)
+- `columns[].null_pct` → % of nulls (drives COALESCE decisions)
+- `columns[].distinct_count` → cardinality (detect duplicate keys)
+- `columns[].top_values` → most frequent values (understand categorical columns)
+- `grain` → what one row represents (use in the GRAIN comment above each INSERT)
+- `modeling_readiness` → data quality signal (flag "low" tables with a warning comment)
 
-- `row_count` → total rows (use to detect empty tables).  
-- `columns[].null_pct` → % of nulls in that column (drives COALESCE decisions).  
-- `columns[].distinct_count` → cardinality (use to detect duplicate keys).  
-- `columns[].top_values` → most frequent values (use to understand categorical columns).  
-- `grain` → what one row represents (use in the GRAIN comment above each INSERT).  
-- `modeling_readiness` → data quality signal (flag "low" tables with a warning comment).
+Use this file to decide on COALESCE, detect duplicates requiring ROW_NUMBER(), flag 100%-null columns, and validate join keys.
 
-Use this file to:
+### 2C — Reading Target Schema CSVs
 
-- Decide whether to apply COALESCE on a column.  
-- Detect duplicate rows and apply ROW_NUMBER() deduplication.  
-- Flag 100% null columns and skip them.  
-- Validate that join keys are not null.
+The target schema is supplied via two CSV files:
+- `PreBuilt-Discovery-Strategy/src/redshift_schema_columns.csv` → the `Columns` sheet
+- `PreBuilt-Discovery-Strategy/src/redshift_schema_dimatrix.csv` → the `DiMatrix` sheet
 
-#### 2C — Reading Target Schema (CSV)
+Treat these CSVs as the authoritative representation of the target schema.
 
-The target schema is supplied via two CSV files — `Columns` and `DiMatrix` — that represent the star-schema design:
+**`Columns` sheet** — two columns: `Table` and `Column`.
+- `Table` → target table name (use as `{output_schema}.{Table}` in INSERT INTO)
+- `Column` → target column name (use verbatim in INSERT column list and SELECT aliases)
+- Group rows by `Table` to get the full column list per target table
+- Identify table type from prefix: `fact*` → fact, `dim*` → dimension, `bridge*` → bridge
 
-- `../src/redshift_schema_columns.csv`  → text version of the `Columns` sheet  
-- `../src/redshift_schema_dimatrix.csv` → text version of the `DiMatrix` sheet
+**`DiMatrix` sheet** — pivot matrix: rows = fact tables, columns = dimension tables, value `1` = relationship exists.
+- This matrix is the **authoritative and complete** definition of every fact-to-dimension relationship. Do not infer, add, or remove relationships beyond what it states.
+- `1` = that dimension table has a foreign key in that fact table. Every `1` MUST produce: a `*_key` FK column in the fact DDL, and a JOIN to that dimension in the fact INSERT SQL.
+- `0` or blank = no relationship. Do not join to that dimension for that fact under any circumstance.
+- **JOIN type rule:** Every DiMatrix `1` relationship uses `LEFT JOIN`. This preserves all fact rows even when a dimension record is missing. Never use `INNER JOIN` for DiMatrix-driven joins — an `INNER JOIN` silently drops fact rows with unmatched dimension keys.
 
-Treat these CSVs as the authoritative text representation of the target schema.
-
-`**Columns` Sheet (via `redshift_schema_columns.csv`)**
-
-Two columns: `Table` and `Column`.
-
-- `Table` → target table name (use as `{output_schema}.{Table}` in INSERT INTO).  
-- `Column` → target column name (use verbatim in the INSERT column list and SELECT aliases).
-
-Group rows by `Table` to get the full column list for each target table.  
-Identify table type from the table name prefix:
-
-- `fact`* → fact table  
-- `dim`* → dimension table  
-- `bridge*` → bridge table
-
-`**DiMatrix` Sheet (via `redshift_schema_dimatrix.csv`)**
-
-A pivot matrix: rows = fact tables, columns = dimension tables, value `1` = relationship exists.
-
-- Use this to determine which dimension keys appear in each fact table.  
-- `1` in a cell = that dimension key is a foreign key in that fact table.  
-- Use `INNER JOIN` for mandatory dimensions, `LEFT JOIN` for optional ones.
-
-#### 2D — Reading `../config.json`
+### 2D — Reading `PreBuilt-Discovery-Strategy/config.json`
 
 Extract exactly two values:
-
-- `output_schema` → prefix for all target tables in INSERT INTO statements  
+- `output_schema` → prefix for all target tables in INSERT INTO statements
 - `source_schema` → prefix for all source tables in FROM and JOIN clauses
 
-Every source table reference must be: `{source_schema}.{table_name}`  
-Every target table reference must be: `{output_schema}.{table_name}`
+Every source table reference: `{source_schema}.{table_name}`
+Every target table reference: `{output_schema}.{table_name}`
 
 ---
 
-### Step 3 — Domain Grouping (For Planning)
+## ⚠️ Section C — Guardrails (Enforced After Step 2 — All Input File Definitions Apply)
 
-Before writing any SQL, perform the following analysis **for your own planning**.
+> These guardrails reference fields and files defined in Step 2. Read Step 2 fully before applying these rules.
+> **If resuming after a context overflow or interrupted session:** read `PreBuilt-Discovery-Strategy/docs/etl-step-summary-log.md` first to identify the last completed **step** (not just domain), then continue from the next step. Do not re-process any step that already has a log entry.
 
-- Use this step primarily to understand source/target clustering, execution ordering, and shared business keys.
-- **Only present the full domain plan table to the user if they explicitly ask for domain-level visibility or planning.**
-
-#### Step 3A — Identify Source Naming Patterns
-
-Read all table names from `../erd.json`.  
-Identify the naming convention used (prefix groups, module separators, schema segments).  
-List all distinct source prefix groups you find.
-
-#### Step 3B — Map Source Groups to Target Tables
-
-For each source prefix group:
-
-- Find the target tables in the target schema CSVs whose names semantically align.  
-- Assign a human-readable **domain name** to the group.  
-- List the target dimensions, bridges, and facts that belong to this domain.
-
-#### Step 3C — (Optional) Present the Domain Plan
-
-If the user wants to see the domain groupings, output a table in this format; otherwise you may keep the domain analysis internal:
-
-
-| #   | Domain Name | Source Tables                      | Target Dimensions | Target Bridges   | Target Facts   | Primary Join Key |
-| --- | ----------- | ---------------------------------- | ----------------- | ---------------- | -------------- | ---------------- |
-| 1   | {name}      | {source_table_1}, {source_table_2} | {dim_table_1}     | {bridge_table_1} | {fact_table_1} | {join_key}       |
-| 2   | ...         | ...                                | ...               | ...              | ...            | ...              |
-
+| Rule | Detail |
+|---|---|
+| No skipped tables | Every table in the target schema CSVs must have both a `CREATE TABLE` definition and an `INSERT` statement |
+| No invented columns | Only use column names from the `Columns` sheet in DDL and INSERT column lists |
+| No placeholders in SQL | Every statement must be executable as-is on Redshift |
+| No silent guesses | Uncertain mappings must carry a `-- TODO:` or `-- derived:` comment |
+| Auto-continue always | After domain plan confirmation, process ALL domains sequentially without pausing. Never stop between domains for any reason. Log completion after each domain and immediately begin the next. |
+| All SQL goes to file | Every generated DDL and INSERT statement MUST be appended to `PreBuilt-Discovery-Strategy/src/star_schema_full.sql`. If the file does not exist, create it first. Never leave SQL only in the chat response. |
+| No source tables in INSERT target | FROM/JOIN clauses reference `source_schema` only; INSERT INTO references `output_schema` only |
+| No bare column references | Always apply casting and null-handling where EDA shows issues |
+| No skipping transformations | Apply ALL applicable rules from Section A-1D for every column |
+| Low modeling_readiness warning | If a source table has `modeling_readiness = "low"` in `PreBuilt-Discovery-Strategy/src/eda.json`, add a block `-- WARNING` comment above its INSERT |
+| Empty source table handling | If a source table has `row_count = 0` in `PreBuilt-Discovery-Strategy/src/eda.json`, generate the DDL, but replace the INSERT body with a `WHERE 1 = 0` guard and add a `-- WARNING: source table is empty` comment |
+| Context overflow handling | If the combined size of all input files exceeds what fits in context, process one domain at a time: load only the source tables relevant to that domain, complete it fully, then move to the next. **On resumption, read `PreBuilt-Discovery-Strategy/docs/etl-step-summary-log.md` first to find the last completed domain.** |
+| Log file initialisation | Before appending to `PreBuilt-Discovery-Strategy/docs/etl-step-summary-log.md`, check whether the file exists. If it does not, create it with the header defined in **Section B-1** (single source of truth), then append. Never overwrite earlier entries |
 
 ---
 
-## Step 1 — Table DDL + ETL SQL Generation Rules
+## Step 3 — Domain Grouping (Planning)
+
+Before writing any SQL, perform this analysis.
+
+### 3A — Identify Source Naming Patterns
+
+Read all table names from `PreBuilt-Discovery-Strategy/src/erd.json`. Identify the naming convention (prefix groups, module separators, schema segments). List all distinct source prefix groups.
+
+### 3B — Map Source Groups to Target Tables
+
+For each source prefix group, find semantically aligned target tables, assign a human-readable domain name, and list the target dimensions, bridges, and facts belonging to that domain.
+
+### 3C — ⚠️ Present the Domain Plan (MANDATORY on First Run)
+
+**Always output this table before generating any SQL.** After presenting it, pause and output exactly:
+
+> `[DOMAIN PLAN READY] Please confirm this grouping is correct, or provide corrections. Reply "confirmed" to proceed with SQL generation.`
+
+Wait for the user to reply before continuing. This is a required checkpoint — domain mis-grouping silently corrupts all downstream SQL.
+
+| # | Domain Name | Source Tables | Target Dimensions | Target Bridges | Target Facts | Primary Join Key |
+|---|---|---|---|---|---|---|
+| 1 | {name} | {source_table_1}, {source_table_2} | {dim_table_1} | {bridge_table_1} | {fact_table_1} | {join_key} |
+| 2 | ... | ... | ... | ... | ... | ... |
+
+---
+
+## Section A — DDL + ETL SQL Generation Rules
 
 Apply these rules to every `CREATE TABLE` and `INSERT INTO` statement you generate.
 
----
-
-### 1A — Table DDL (CREATE TABLE) Rules
-
-For every target table defined in `../src/redshift_schema_columns.csv`, generate a Redshift-compatible `CREATE TABLE` statement **before** you generate the corresponding `INSERT INTO`:
-
-- Use `{output_schema}` from `../config.json` as the schema name.  
-- Use the `Columns` sheet to drive the column list (one column per row for that table).  
-- Use `../erd.json` / `../eda.json` to infer reasonable data types, nullability, and constraints:  
-  - Prefer types that match the raw source columns or safe supersets.  
-  - Add `NOT NULL` only when the business key or EDA clearly indicates it is always populated.  
-  - Prefer `CREATE TABLE IF NOT EXISTS {output_schema}.{table} (...);` so the DDL is idempotent.
-- Where primary keys are obvious, add a `PRIMARY KEY` constraint; where foreign keys are obvious, add `REFERENCES` clauses, otherwise leave them commented as TODO.
-
-Keep DDL in a separate block from the INSERT but in the **same order** (dimensions, then bridges, then facts) so it can be applied first.
+> **Rule application order:** A-1A → A-1C → A-1D → A-1E → A-1F → A-1G → A-1H
 
 ---
 
-### 1B — Statement Structure
+### A-1A — Table DDL (CREATE TABLE) Rules
+
+For every target table defined in `PreBuilt-Discovery-Strategy/src/redshift_schema_columns.csv`, generate a Redshift-compatible `CREATE TABLE` statement **before** the corresponding `INSERT INTO`:
+
+- Use `{output_schema}` from `PreBuilt-Discovery-Strategy/config.json` as the schema name
+- Use the `Columns` sheet to drive the column list (one column per row for that table)
+- Use `PreBuilt-Discovery-Strategy/src/erd.json` / `PreBuilt-Discovery-Strategy/src/eda.json` to infer reasonable data types, nullability, and constraints:
+  - Prefer types that match the raw source columns or safe supersets
+  - Add `NOT NULL` only when the business key or EDA clearly indicates it is always populated
+  - Use `CREATE TABLE IF NOT EXISTS {output_schema}.{table} (...);` to keep DDL idempotent
+- Where primary keys are obvious, add a `PRIMARY KEY` constraint; where foreign keys are obvious, add `REFERENCES` clauses; otherwise leave them commented as `-- TODO: add FK after validation`
+
+Keep DDL in a separate block from the INSERT but in the **same order** (dimensions → bridges → facts).
+
+After generating each DDL block, **immediately append it to `PreBuilt-Discovery-Strategy/src/star_schema_full.sql`** before proceeding to the next statement.
+
+---
+
+### A-1B — Statement Structure
 
 Every INSERT block must follow this exact structure:
 
@@ -240,27 +236,35 @@ SELECT
     {expression_3}   AS {col_3}
     -- ... one expression per target column
 FROM {source_schema}.{primary_source_table}  s1
-LEFT JOIN {source_schema}.{secondary_source_table}  s2
+LEFT JOIN {source_schema}.{secondary_source_table}  s2   -- second raw source (if needed)
     ON s1.{join_key} = s2.{join_key}
+-- DiMatrix-driven dimension joins — use d1, d2, d3 aliases (never s* aliases for dims)
+LEFT JOIN {output_schema}.{dim_table_1}  d1
+    ON s1.{shared_natural_key} = d1.{dim_natural_key}    -- DiMatrix: {fact_table} → {dim_table_1}
+LEFT JOIN {output_schema}.{dim_table_2}  d2
+    ON s1.{shared_natural_key} = d2.{dim_natural_key}    -- DiMatrix: {fact_table} → {dim_table_2}
 WHERE
     COALESCE(s1.isdeleted, FALSE) = FALSE   -- exclude soft-deleted rows (if column exists)
     AND s1.{natural_key} IS NOT NULL        -- exclude rows with null primary key
 ;
+-- ALIAS CONVENTION:
+-- s1, s2, s3 → raw source tables from source_schema
+-- d1, d2, d3 → target dimension tables from output_schema (DiMatrix joins only)
 ```
+
+After generating each INSERT block, **immediately append it to `PreBuilt-Discovery-Strategy/src/star_schema_full.sql`**.
 
 ---
 
-### 1C — Column Mapping Logic
+### A-1C — Column Mapping Logic
 
 For every target column:
-
-1. Search `erd.json` for a source column whose name or meaning matches the target column.
-2. Apply transformations (see Section 1D).
-3. Alias the result to the exact target column name.
-4. Add an inline comment explaining the mapping.
+1. Search `PreBuilt-Discovery-Strategy/src/erd.json` for a source column whose name or meaning matches the target column
+2. Apply transformations (see Section A-1D)
+3. Alias the result to the exact target column name
+4. Add an inline comment explaining the mapping
 
 Comment conventions:
-
 ```sql
 {expression}  AS {col}   -- source: {source_table}.{source_column}
 {expression}  AS {col}   -- derived: {plain English description of the logic}
@@ -269,120 +273,87 @@ NULL::{type}  AS {col}   -- TODO: no source mapping identified
 
 ---
 
-### 1D — Transformation Rules
+### A-1D — Transformation Rules
 
-Apply every applicable rule below. Treat the combination of `../erd.json`, `../eda.json`, and the target schema CSV files (`../src/redshift_schema_columns.csv` + `../src/redshift_schema_dimatrix.csv`) as the **authoritative specification** for how to transform and map source data into the vertical schema.
+Apply every applicable rule below. Treat `PreBuilt-Discovery-Strategy/src/erd.json`, `PreBuilt-Discovery-Strategy/src/eda.json`, and the target schema CSVs as the **authoritative specification** for how to transform and map source data.
 
-#### 1D.1 High-Level Transformation Strategies (ETL/ELT)
+#### A-1D.1 — Transformation Strategies (Summary)
 
-You MUST use the following principles when mapping from ERD/EDA metadata to the vertical schema workbook fields:
+| Strategy | When to Apply |
+|---|---|
+| **Direct mapping** | Source column type and semantics match target; confirm via `PreBuilt-Discovery-Strategy/src/erd.json` + `PreBuilt-Discovery-Strategy/src/eda.json` |
+| **Derived columns** | No 1:1 source exists; compute from one or more columns and document logic in comment |
+| **Conditional mapping** | Target semantics differ from raw codes; use `CASE` expressions or business rules |
+| **Pre-aggregation** | Target grain is coarser than source grain; aggregate before inserting |
+| **Window functions** | Rolling/cumulative metrics or time-series aggregations needed |
+| **Dimension lookups** | Replace raw IDs with descriptive attributes via reference tables |
+| **Deduplication** | `distinct_count < row_count` on natural key in `PreBuilt-Discovery-Strategy/src/eda.json`; apply ROW_NUMBER() filtering |
+| **Null handling** | `null_pct > 0` in `PreBuilt-Discovery-Strategy/src/eda.json`; apply COALESCE per type rules below |
+| **Type casting** | Source type does not match target type per `PreBuilt-Discovery-Strategy/src/erd.json`; apply explicit cast |
+| **Audit/lineage comments** | Always — add inline source/logic comments; never emit silent transformations |
 
-##### a. Column Mapping
+For complex or expensive transformations, prefer push-down execution in Redshift SQL. Use staging tables only where necessary for readability or performance.
 
-- **Direct mapping**: Map a source column directly to a target column when types and semantics match. Use `erd.json` to confirm type compatibility and naming similarity, and `eda.json` to confirm basic data quality.
-- **Derived columns**: When the target column does not have a 1:1 source, derive it from one or more source columns (e.g., `total_amount = quantity * unit_price`, `full_name = first_name || ' ' || last_name`). Document the logic in the inline comment.
-- **Conditional mapping**: Apply `CASE` expressions or business rules (e.g., mapping status codes to categories, normalizing flags) when the target semantics differ from the raw codes.
+#### A-1D.2 — Topic-Level Quality Rules (Required)
 
-##### b. Aggregations
+**Required measures and defaults**
+- For core additive measures that are conceptually present on every fact row, model them as `NOT NULL` with a sensible default in DDL, and always `COALESCE` to that default in ETL.
+- Before tightening to `NOT NULL`, backfill any existing NULLs using UPDATEs aligned with business rules.
 
-- **Pre-aggregations**: Aggregate to match target grain.
-- **Rolling / cumulative metrics**: Use window functions where needed.
-- **Time-series aggregations**: Use DATE_TRUNC or grouping expressions.
+**Date / time / lifecycle data types**
+- Columns representing dates or periods MUST be typed as `DATE` or `TIMESTAMP`, not `VARCHAR`, unless the business explicitly requires free-form text.
+- When the source is a string, use `TO_DATE` / `TO_TIMESTAMP` with an explicit format derived from `PreBuilt-Discovery-Strategy/src/eda.json`, and add QA comments or filters if a significant fraction of values do not match the expected format.
 
-##### c. Lookups & Joins
+**Referential integrity from DiMatrix**
+- The DiMatrix is the complete and authoritative source of every fact-to-dimension FK relationship. Every `1` = a required FK column in the fact DDL and a `LEFT JOIN` in the ETL INSERT.
+- Resolve every DiMatrix `1` using the natural key resolution chain in A-1G before generating any fact INSERT.
+- Once ETL reliably populates FK columns with low null rates, add `FOREIGN KEY` constraints in DDL. Until then keep them as `-- TODO: enable FK after validation`.
 
-- **Dimension lookups**: Replace raw IDs with descriptive attributes using dimension/reference tables.
-- **Join strategies**: Prefer `INNER JOIN` for mandatory, `LEFT JOIN` for optional, avoid `CROSS JOIN` or `FULL OUTER JOIN`.
+**Placeholder NULL keys**
+- Avoid long-term `NULL::BIGINT` placeholders for foreign keys in facts. When a DiMatrix relationship exists, either implement the real join now, or explicitly comment: `-- TODO: no reliable source mapping yet` and keep the column nullable.
 
-##### d. Data Cleaning
+**Shared/conformed dimensions**
+- Core shared dimensions (product, location, geography, calendar/time) must not remain empty skeletons. Design and document population logic for them, even if initial ETL uses stub values or a generated calendar.
+- Facts carrying keys such as `product_key`, `geography_key`, `date_key` should eventually join to these shared dimensions with high non-null coverage; design ETL with that end-state in mind.
 
-- **Null handling**: Use `null_pct` and `top_values` from `eda.json`.
-- **Standardization**: Normalize dates, numeric scales, categorical values.
-- **Deduplication**: Detect duplicates and apply ROW_NUMBER() filtering.
-
-##### e. Enrichment
-
-- **Derived metrics**: Compute KPIs as needed.
-- **Hierarchical enrichment**: Populate rollups from upstream reference tables.
-- **External data integration**: Join additional context tables if available.
-
-##### f. Performance Optimization
-
-- **Push-down transformations**: Execute in Redshift SQL where possible.
-- **Materialized views / staging tables**: For expensive transformations.
-- **Parallel processing**: Respect parallelism rules in helper scripts.
-
-##### g. Audit & Lineage
-
-- **Transformation tracking**: Inline comments for source/logic.
-- **Versioned outputs**: Idempotent scripts, reproducible outputs.
-- **Monitoring & alerting**: Row counts, null-rate checks, or other assertions.
+**ETL quality gates**
+- For each domain, design at least basic assertions: null-rate checks for required measures/keys, orphan-key counts for fact→dim joins, and format checks for critical date/time fields.
+- Quarantine bad rows in separate tables rather than silently loading them into main facts; reflect any known compromises with clear `-- WARNING` comments.
 
 ---
 
 #### Type Casting
 
-```sql
--- String → Date
-CAST({col} AS DATE)
--- or if format varies:
-TO_DATE({col}, 'YYYY-MM-DD')
-
--- String → Timestamp
-CAST({col} AS TIMESTAMP)
--- or:
-TO_TIMESTAMP({col}, 'YYYY-MM-DD HH24:MI:SS')
-
--- String → Numeric
-CAST({col} AS NUMERIC(18,4))
-
--- String → Integer
-CAST({col} AS INTEGER)
-
--- Boolean-like strings ('Y'/'N', '1'/'0', 'true'/'false')
-CASE WHEN {col} IN ('Y', 'true', '1', 'yes') THEN TRUE ELSE FALSE END
-
--- UUID / GUID
-CAST({col} AS VARCHAR(50))
-```
+| When to Apply | SQL |
+|---|---|
+| Source is string, target is DATE | `CAST({col} AS DATE)` or `TO_DATE({col}, 'YYYY-MM-DD')` if format varies |
+| Source is string, target is TIMESTAMP | `CAST({col} AS TIMESTAMP)` or `TO_TIMESTAMP({col}, 'YYYY-MM-DD HH24:MI:SS')` |
+| Source is string, target is NUMERIC | `CAST({col} AS NUMERIC(18,4))` |
+| Source is string, target is INTEGER | `CAST({col} AS INTEGER)` |
+| Source is boolean-like string ('Y'/'N', '1'/'0') | `CASE WHEN {col} IN ('Y', 'true', '1', 'yes') THEN TRUE ELSE FALSE END` |
+| Source is UUID/GUID | `CAST({col} AS VARCHAR(50))` |
 
 #### Null Handling
 
-Apply based on `null_pct` from `eda.json`:
-
-```sql
--- null_pct > 0, string column
-COALESCE(CAST({col} AS VARCHAR(255)), 'Unknown')
-
--- null_pct > 0, numeric column
-COALESCE(CAST({col} AS NUMERIC(18,4)), 0)
-
--- null_pct > 0, date column
-COALESCE(CAST({col} AS DATE), '1900-01-01'::DATE)
-
--- null_pct > 0, boolean column
-COALESCE({col}, FALSE)
-
--- null_pct = 100 → skip source column entirely, use default + comment
-'Unknown'::VARCHAR(255)  AS {col}  -- WARNING: source column is 100% null, using default
-
--- null_pct > 50 → map but add warning
-COALESCE(CAST({col} AS VARCHAR(255)), 'Unknown')  AS {col}  -- WARNING: source column is >50% null in EDA
-```
+| When to Apply | SQL |
+|---|---|
+| `null_pct > 0`, string column | `COALESCE(CAST({col} AS VARCHAR(255)), 'Unknown')` |
+| `null_pct > 0`, numeric column | `COALESCE(CAST({col} AS NUMERIC(18,4)), 0)` |
+| `null_pct > 0`, date column | `COALESCE(CAST({col} AS DATE), '1900-01-01'::DATE)` |
+| `null_pct > 0`, boolean column | `COALESCE({col}, FALSE)` |
+| `null_pct = 100` | `'Unknown'::VARCHAR(255) AS {col}  -- WARNING: source column is 100% null, using default` |
+| `null_pct > 50` | `COALESCE(CAST({col} AS VARCHAR(255)), 'Unknown') AS {col}  -- WARNING: source column is >50% null in EDA` |
 
 #### Surrogate Key Generation
 
-```sql
--- If source has no surrogate key:
-ROW_NUMBER() OVER (ORDER BY {natural_key_col})  AS {target_key_col}
-
--- If source already has a surrogate key column (identifiable by _key_sk suffix in erd.json):
-CAST(s1.{col}_key_sk AS BIGINT)  AS {target_key_col}
-```
+| When to Apply | SQL |
+|---|---|
+| Source has no surrogate key | `ROW_NUMBER() OVER (ORDER BY {natural_key_col}) AS {target_key_col}` |
+| Source already has a surrogate key (`_key_sk` suffix in `PreBuilt-Discovery-Strategy/src/erd.json`) | `CAST(s1.{col}_key_sk AS BIGINT) AS {target_key_col}` |
 
 #### Deduplication
 
-Apply when `distinct_count < row_count` on the natural key column in `eda.json`:
+Apply when `distinct_count < row_count` on the natural key column in `PreBuilt-Discovery-Strategy/src/eda.json`:
 
 ```sql
 FROM (
@@ -398,7 +369,7 @@ WHERE s1._rn = 1
 
 #### Soft Delete Filter
 
-Apply whenever `isdeleted` exists in the source table (visible in `erd.json`):
+Apply when `isdeleted` exists in the source table (visible in `PreBuilt-Discovery-Strategy/src/erd.json`):
 
 ```sql
 WHERE COALESCE(s1.isdeleted, FALSE) = FALSE
@@ -406,7 +377,7 @@ WHERE COALESCE(s1.isdeleted, FALSE) = FALSE
 
 #### Active Record Filter
 
-Apply when `meta_record_status` exists in the source table:
+Apply when `meta_record_status` exists in the source table (visible in `PreBuilt-Discovery-Strategy/src/erd.json`):
 
 ```sql
 AND s1.meta_record_status = 'A'
@@ -414,50 +385,57 @@ AND s1.meta_record_status = 'A'
 
 ---
 
-### 1E — JOIN Strategy
+### A-1E — JOIN Strategy
 
+| Situation | JOIN Type |
+|---|---|
+| DiMatrix `1` relationship — fact to dimension | Always `LEFT JOIN` — never `INNER JOIN` |
+| Secondary source enriches primary (optional match) | `LEFT JOIN` |
+| Source table lookup where missing row = invalid fact | `INNER JOIN` — document reason in comment |
+| Never use | `CROSS JOIN`, `FULL OUTER JOIN` |
 
-| Situation                                                           | JOIN Type                       |
-| ------------------------------------------------------------------- | ------------------------------- |
-| Secondary source table enriches the primary (optional match)        | `LEFT JOIN`                     |
-| Dimension is mandatory for a fact row to be valid                   | `INNER JOIN`                    |
-| Dimension is optional (marked in DiMatrix or semantically optional) | `LEFT JOIN`                     |
-| Never use                                                           | `CROSS JOIN`, `FULL OUTER JOIN` |
+**Rule:** For all DiMatrix-driven fact-to-dimension joins, `LEFT JOIN` is mandatory. It ensures fact rows are never silently dropped due to a missing or late-arriving dimension record. If a dimension key resolves to `NULL` after a `LEFT JOIN`, that is a data quality signal to capture in the log — not a reason to use `INNER JOIN`.
 
-
-Always join on natural business keys visible in `erd.json` (e.g., shared `id`, `customerid`, `productid` columns).
-Use aliases `s1`, `s2`, `s3` etc. for source tables, in order of join sequence.
-
----
-
-### 1H — Fact–Dimension Relationships from DiMatrix
-
-You MUST use `../src/redshift_schema_dimatrix.csv` as the **authoritative map** of which dimensions relate to each fact table:
-
-- For each fact table row in DiMatrix, every `1` under a dimension column means:
-  - that dimension’s surrogate key should appear as a foreign key column in the fact table (e.g. `individual_key`, `organization_key`, `membership_key`, `renewalgrouping_key`), and  
-  - the ETL `INSERT INTO ... SELECT` for that fact must populate that foreign key by **joining to the corresponding dimension** on natural keys from `erd.json` (e.g. `customerid`, `organizationid`, product codes, dates).
-- Where both the fact and dimension share a surrogate key source (e.g. both built from the same source table with `_key_sk`), you may map directly (`CAST(source_surrogate AS BIGINT)`).
-- When a dimension is present in DiMatrix but you cannot confidently derive the key from available sources, set the foreign key column to `NULL` and add a `-- TODO:` comment explaining the missing join.
-- Optionally, when the fact and dimension keys are stable and obvious, you may add `FOREIGN KEY` constraints in the DDL (or leave them commented out with a `-- TODO: enable FK after validation` note).
-
-This ensures that **every fact–dimension relationship in DiMatrix is reflected both in the target schema (columns) and in the ETL population logic.**
+Always join on natural business keys visible in `PreBuilt-Discovery-Strategy/src/erd.json`. Use aliases `s1`, `s2`, `s3` for source tables and `d1`, `d2`, `d3` for dimension tables in join sequence order.
 
 ---
 
-### 1F — Ordering Within Each Domain
+### A-1F — Ordering Within Each Domain
 
-Always emit INSERT statements in this order within a domain:
-
-1. **Dimension tables** — no dependencies on other target tables.
-2. **Bridge tables** — depend on dimension keys.
-3. **Fact tables** — depend on dimension and bridge keys.
+Always emit statements in this order within a domain:
+1. **Dimension tables** — no dependencies on other target tables
+2. **Bridge tables** — depend on dimension keys
+3. **Fact tables** — depend on dimension and bridge keys
 
 ---
 
-### 1G — Unmappable Tables
+### A-1G — Fact–Dimension Relationships from DiMatrix
 
-If a target table has no identifiable source tables in `erd.json`:
+Use `PreBuilt-Discovery-Strategy/src/redshift_schema_dimatrix.csv` as the **authoritative and complete map** of which dimensions relate to each fact table. Every `1` is a required relationship. Every `0` or blank is explicitly not a relationship.
+
+**For every `1` in the DiMatrix, follow this exact resolution chain to build the JOIN:**
+
+1. **Identify the dimension's source table** — find the dim table name from the DiMatrix column header, then locate its corresponding source table in `PreBuilt-Discovery-Strategy/src/erd.json` by name or semantic match
+2. **Identify the shared natural key** — find the column that appears in both the fact's source table and the dim's source table in `PreBuilt-Discovery-Strategy/src/erd.json` with matching semantics (e.g. `contactid`, `accountid`, `productid`). This is the JOIN condition.
+3. **If the column name differs between tables** — use `PreBuilt-Discovery-Strategy/src/eda.json` top_values and distinct_count to confirm they represent the same domain, then join on those two columns with an explanatory comment.
+4. **Pull the dim's surrogate key** — alias it to the target FK column name in the fact (e.g. `dim_customer.customer_key AS customer_key`)
+5. **If no shared key column can be identified with confidence** — set FK to `NULL::BIGINT` and add `-- TODO: natural key not resolved between {fact_source} and {dim_source}`
+
+**JOIN type:** Always `LEFT JOIN` for every DiMatrix relationship. Never `INNER JOIN`. See Section 2C for rationale.
+
+**DDL:** For every DiMatrix `1`, the fact table DDL must include the corresponding `*_key BIGINT` FK column. Add `-- TODO: enable FK after validation` rather than a live `REFERENCES` constraint until data quality is confirmed.
+
+**Example pattern:**
+```sql
+LEFT JOIN {output_schema}.{dim_table} d1
+    ON s1.{shared_natural_key} = d1.{dim_natural_key}  -- DiMatrix: {fact_table} → {dim_table}
+```
+
+---
+
+### A-1H — Unmappable Tables
+
+If a target table has no identifiable source tables in `PreBuilt-Discovery-Strategy/src/erd.json`:
 
 ```sql
 -- ────────────────────────────────────────────────────────
@@ -472,181 +450,230 @@ INSERT INTO {output_schema}.{target_table}
     {col_2}
 )
 SELECT
-    NULL::BIGINT         AS {col_1},  -- TODO:
-```
-
-no source mapping identified
-NULL::VARCHAR(255)   AS {col_2}   -- TODO: no source mapping identified
+    NULL::BIGINT         AS {col_1},   -- TODO: no source mapping identified
+    NULL::VARCHAR(255)   AS {col_2}    -- TODO: no source mapping identified
 WHERE 1 = 0  -- prevent empty insert from running until source is confirmed
 ;
-
 ```
+
+Append this block to `PreBuilt-Discovery-Strategy/src/star_schema_full.sql` like any other statement.
 
 ---
 
-## Step 2 — Execution Flow & Begin
+## Section B — Execution Flow & Begin
 
 Follow this flow precisely. Do not deviate.
 
-```text
+```
 [START]
     │
     ▼
-Read all 4 logical inputs fully (`../erd.json`, `../eda.json`, target schema via `../src/redshift_schema_columns.csv` + `../src/redshift_schema_dimatrix.csv`, and `../config.json`)
+Read all 5 logical inputs fully:
+  PreBuilt-Discovery-Strategy/src/erd.json        → LOG: [INIT:read-erd] erd.json read | {N} source tables
+  PreBuilt-Discovery-Strategy/src/eda.json        → LOG: [INIT:read-eda] eda.json read | {N} low-readiness / empty flags
+  PreBuilt-Discovery-Strategy/src/redshift_schema_columns.csv  → LOG: [INIT:read-columns] columns CSV read | {N} target tables
+  PreBuilt-Discovery-Strategy/src/redshift_schema_dimatrix.csv → LOG: [INIT:read-dimatrix] dimatrix CSV read | {N} relationships
+  PreBuilt-Discovery-Strategy/config.json         → LOG: [INIT:read-config] config read | output_schema={x}, source_schema={y}
     │
     ▼
-Step 3: (Optionally) propose domain groupings for internal planning purposes
+Step 3: Perform domain grouping → Present domain plan table (Step 3C)
+→ LOG: [INIT:domain-plan] domain plan presented | {N} domains identified
     │
     ▼
-Take the first logical domain / subject area (either inferred from the schema or explicitly provided by the user)
+⚠️ [PAUSE — MANDATORY] Output domain plan. Wait for user confirmation before proceeding.
+    │
+    ▼ (user replies "confirmed")
+→ LOG: [INIT:confirmed] domain plan confirmed | proceeding to SQL generation
+    │
+Check if PreBuilt-Discovery-Strategy/src/star_schema_full.sql exists.
+If not → CREATE the file now (empty).
+Emit first statement: CREATE SCHEMA IF NOT EXISTS {output_schema};
+Append to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG: [INIT:schema] CREATE SCHEMA written | {output_schema}
     │
     ▼
-Generate CREATE TABLE DDL for all dimension tables in this domain
+Take the first confirmed domain
     │
     ▼
-Generate CREATE TABLE DDL for all bridge tables in this domain
+[STEP: Read inputs for this domain]
+→ LOG: [{name}:read-inputs] source tables scanned | {N} tables, {M} EDA flags
     │
     ▼
-Generate CREATE TABLE DDL for all fact tables in this domain
+[STEP: Generate CREATE TABLE DDL — dimensions]
+→ Append DDL to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG (one line per table): [{name}:dim-ddl] {table_name} DDL written | {N} columns
     │
     ▼
-Generate INSERT SQL for all dimension tables in this domain
+[STEP: Generate CREATE TABLE DDL — bridges]
+→ Append DDL to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG (one line per table, or): [{name}:bridge-ddl] no bridge tables | skipped
     │
     ▼
-Generate INSERT SQL for all bridge tables in this domain
+[STEP: Generate CREATE TABLE DDL — facts]
+→ Append DDL to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG (one line per table): [{name}:fact-ddl] {table_name} DDL written | {N} FK columns
     │
     ▼
-Generate INSERT SQL for all fact tables in this domain
+[STEP: Generate INSERT SQL — dimensions]
+→ Append INSERT blocks to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG (one line per table): [{name}:dim-insert] {table_name} INSERT written | {key flags e.g. dedup, COALESCE x3}
     │
     ▼
-Optionally output: "Domain {name} complete (DDL + INSERT)."
+[STEP: Generate INSERT SQL — bridges]
+→ Append INSERT blocks to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG (one line per table, or): [{name}:bridge-insert] no bridge tables | skipped
     │
     ▼
-Automatically continue with the next domain unless the user has requested a pause/review between domains
+[STEP: Generate INSERT SQL — facts]
+→ Append INSERT blocks to PreBuilt-Discovery-Strategy/src/star_schema_full.sql
+→ LOG (one line per table): [{name}:fact-insert] {table_name} INSERT written | {N} DiMatrix joins, {M} FKs resolved
     │
     ▼
-[END] Output: "All domains complete. {N} CREATE TABLE + {M} INSERT statements generated."
+LOG: [{name}:done] domain complete | {N} DDL + {M} INSERT → star_schema_full.sql
+    │
+    ▼
+← LOOP: Immediately begin next domain. No pause. No prompt. No wait.
+    │
+    ▼
+[END — when all domains done]
+Output: "All domains complete. {N} CREATE TABLE + {M} INSERT statements generated and written to PreBuilt-Discovery-Strategy/src/star_schema_full.sql."
+
+─────────────────────────────────────────────────────────
+STEP 4 GATE — Do NOT proceed automatically.
+Output exactly: "Do you want me to run the Power BI measures
+generation step (Step 4) now against POWERBI_PBIX_PATH?"
+Wait for explicit "yes" before executing Step 4.
+If user does not confirm → skip Step 4 entirely.
+─────────────────────────────────────────────────────────
 ```
 
 ---
 
-### Step 2A — Per-Step Summary Log (Markdown Memory)
+### Section B-1 — Per-Step Summary Log
 
-In addition to emitting SQL and other artifacts, you MUST maintain a **concise, ordered summary log** of what you actually did at each step in a **dedicated output markdown file**.
+Maintain a **granular, single-line breadcrumb log** in `PreBuilt-Discovery-Strategy/docs/etl-step-summary-log.md`.
 
-- **Where to write it**: Maintain a dedicated section called `### Step Summary Log` in a markdown file named `../docs/etl-step-summary-log.md`. Always append to this section; never overwrite or remove earlier entries.
-- **Structure**: Use a numbered list. For each logical step or domain you complete, add **one item** in the form:  
-`1. **Step X – short title**: one–two sentence summary of what you did and the key outputs (tables, files, domains, or measures).`
-- **Content rules**:
-  - Be factual and concise; do not paste large SQL blocks or code in the log.  
-  - Refer to artifacts by name only (e.g., `fact_sales`, `../sql/star_schema_full.sql`) instead of repeating them.  
-  - Preserve chronological order so the list reads as a high-level execution trace of the whole session.
-- **How to use it as memory**: When you need to recall what has already been done, first consult this `Step Summary Log` section in `../docs/etl-step-summary-log.md` and rely on it as a compact memory of prior steps before asking the user.
+**Log file header — create ONLY if file does not exist, then append. This is the single definition of the log header:**
+
+```markdown
+# ETL Step Summary Log
+_Auto-generated. Append only. Do not edit manually._
+
+### Step Summary Log
+```
+
+**Entry format — one line per action, no exceptions:**
+```
+{N}. [{DOMAIN}:{STEP}] {what was done} | {key output in 3–6 words}
+```
+
+**Examples of correct entries:**
+```
+1.  [INIT:read-erd]          Read erd.json | 14 source tables identified
+2.  [INIT:read-eda]          Read eda.json | 3 low-readiness tables flagged
+3.  [INIT:read-columns]      Read redshift_schema_columns.csv | 9 target tables found
+4.  [INIT:read-dimatrix]     Read redshift_schema_dimatrix.csv | 12 fact-dim relationships mapped
+5.  [INIT:read-config]       Read config.json | output_schema=dw, source_schema=raw
+6.  [INIT:domain-plan]       Domain plan presented | awaiting user confirmation
+7.  [INIT:confirmed]         Domain plan confirmed | proceeding to SQL generation
+8.  [INIT:schema]            CREATE SCHEMA written | dw
+9.  [Customers:dim-ddl]      dim_individual, dim_organization DDL written | 2 tables
+10. [Customers:bridge-ddl]   No bridge tables in this domain | skipped
+11. [Customers:fact-ddl]     fact_membership DDL written | 6 FK columns from DiMatrix
+12. [Customers:dim-insert]   dim_individual INSERT written | dedup on contactid, 3 COALESCEs
+13. [Customers:dim-insert]   dim_organization INSERT written | soft-delete filter applied
+14. [Customers:fact-insert]  fact_membership INSERT written | 4 DiMatrix LEFT JOINs resolved
+15. [Customers:done]         Domain complete | 3 DDL + 3 INSERT → star_schema_full.sql
+```
+
+**Rules:**
+- If the file does not exist, create it with the header above before appending
+- Always append — never overwrite or remove earlier entries
+- **One entry per action** — every read, every DDL block, every INSERT block, every flag, every skip gets its own line
+- **Maximum 10 words after the pipe** — if you need more, you are writing too much
+- Never paste SQL, column lists, or multi-sentence descriptions into the log
+- Log skipped steps explicitly (e.g. `| no bridge tables, skipped`)
+- Log warnings inline (e.g. `| WARNING: 2 columns 100% null`)
+- After each entry, **immediately** continue — no pause, no user prompt, no wait
+- Preserve chronological order — the log must be readable as a complete execution trace from first read to last INSERT
+- **When resuming after context overflow or interruption:** read this log first, find the last completed entry, continue from the next action
 
 ---
 
-### Begin – How to Start This Flow
+### Section B-2 — How to Begin
 
-Start now with **Step 3 — Domain Grouping** as defined in the agent prompt (Steps 0–3), but treat it as a **planning aid**, not a mandatory artifact.
-
-1. Read `../erd.json` → extract all source table names and identify naming patterns.
-2. Read `../src/redshift_schema_columns.csv` → extract all target table names from the `Columns` sheet.
-3. Read `../config.json` → extract `output_schema` and `source_schema`.
-4. Optionally propose domain groupings (and, if the user requests, present them in the table format defined in Step 3C).
-5. In your generated SQL, **ensure the target schema exists first** with a statement such as `CREATE SCHEMA IF NOT EXISTS {output_schema};`.
-6. For each domain / subject area, generate `CREATE TABLE` DDL first (dimensions → bridges → facts), then the corresponding `INSERT INTO ... SELECT` mapping SQL following this execution flow.
-7. As you complete each domain, **append its DDL + INSERT blocks** to a single master script file (for example `../sql/star_schema_full.sql`) so that **all target table creation and population logic can be run from one `.sql` file** in domain order.
-
-You **may begin writing SQL immediately after reading the inputs**, unless the user has explicitly asked you to pause for review/approval of the domain plan first.
-
----
-
-## Step 3 — Guardrails
-
-
-| Rule                              | Detail                                                                                                        |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| No skipped tables                 | Every table in the target schema CSVs must have both a `CREATE TABLE` definition and an INSERT statement      |
-| No invented columns               | Only use column names from the `Columns` sheet in DDL and INSERT column lists                                 |
-| No placeholders in SQL            | Every statement must be executable as-is on Redshift                                                          |
-| No silent guesses                 | Uncertain mappings must have a `-- TODO:` or `-- derived:` comment                                            |
-| Respect user pauses               | If the user requests a pause or review between domains, stop and wait for explicit approval before continuing |
-| No source tables in INSERT target | FROM/JOIN clauses reference `source_schema` only                                                              |
-| No bare column references         | Always apply casting and null-handling where EDA shows issues                                                 |
-| No skipping transformations       | Apply ALL applicable rules from Section 1D for every column                                                   |
-| Low modeling_readiness warning    | If a source table has `modeling_readiness = "low"` in eda.json, add a block comment warning above its INSERT  |
-
+1. Read `PreBuilt-Discovery-Strategy/src/erd.json` → extract all source table names and identify naming patterns
+2. Read `PreBuilt-Discovery-Strategy/src/redshift_schema_columns.csv` → extract all target table names from the `Columns` sheet
+3. Read `PreBuilt-Discovery-Strategy/config.json` → extract `output_schema` and `source_schema`
+4. Read `PreBuilt-Discovery-Strategy/src/eda.json` → note any tables with `row_count = 0` or `modeling_readiness = "low"`
+5. Read `PreBuilt-Discovery-Strategy/src/redshift_schema_dimatrix.csv` → map fact–dimension relationships
+6. Perform domain grouping and **present the domain plan table (Step 3C) — mandatory**
+7. Wait for user confirmation before emitting any SQL
+8. Check if `PreBuilt-Discovery-Strategy/src/star_schema_full.sql` exists — create it if not
+9. Emit `CREATE SCHEMA IF NOT EXISTS {output_schema};` as the first line of `PreBuilt-Discovery-Strategy/src/star_schema_full.sql`
+10. For each confirmed domain, generate DDL first (dimensions → bridges → facts), then INSERT SQL — appending every statement to `PreBuilt-Discovery-Strategy/src/star_schema_full.sql` as you go
 
 ---
 
 ## Step 4 — Create Base Semantic Measures in Power BI
 
-**Type:** Automated (Power BI MCP)  
-**Prerequisite:** All ETL domains completed (`All domains complete` from Step 2)  
-**Variables:** `POWERBI_PBIX_PATH` = `C:\Users\admin2\Documents\test0001.pbix`
+**Type:** Automated (Power BI MCP)
+**Prerequisite:** All ETL domains completed (`All domains complete` message from Section B)
+**Variable:** `POWERBI_PBIX_PATH` — read from `PreBuilt-Discovery-Strategy/config.json` key `powerbi_pbix_path`
 
-**Execution rule:** This step is **optional** and MUST **only** be executed **after** explicitly asking the user something like:  
-`Do you want me to run the Power BI measures generation step (Step 4) now against POWERBI_PBIX_PATH?`  
-and receiving a clear **yes/approval**. If the user does not approve, **skip Step 4.**
+**Execution rule:** This step is **optional** and MUST only be executed after the explicit approval gate in Section B's execution flow outputs:
+> *"Do you want me to run the Power BI measures generation step (Step 4) now against POWERBI_PBIX_PATH?"*
 
-Use this step at the very end to generate a consistent, base set of **DAX measures** in Power BI on top of the warehouse facts and dimensions, by driving the Power BI modeling MCP tools against `POWERBI_PBIX_PATH`.
+and receives a clear **yes**. If the user does not approve, skip Step 4 entirely.
+
+**If Power BI MCP tools are unavailable** (connection failure, path not found, or tool not responding): do not halt. Instead, output a `-- TODO` list of recommended measures per fact table (row count, distinct business key, SUM/AVG per numeric column, and at least one domain KPI) so the user can create them manually.
 
 ### Objective
 
-Create a **context-aware set of DAX measures** for each fact table in the Power BI model, using information from:
-
-- Redshift profiling and EDA (`../eda.json`)
-- Role and grain inference from the star schema (`../src/redshift_schema_columns.csv`, `../src/redshift_schema_dimatrix.csv`)
-- The ETL grain comments you emitted in each `INSERT` block
-- Existing Power BI model metadata (tables, columns, relationships, and measures)
-
-The goal is to go beyond static measures and generate business-meaningful calculations that align with the warehouse design.
+Create a **context-aware set of DAX measures** for each fact table in the Power BI model, using:
+- Redshift profiling and EDA (`PreBuilt-Discovery-Strategy/src/eda.json`)
+- Role and grain inference from the star schema CSVs
+- ETL grain comments emitted in each INSERT block
+- Existing Power BI model metadata (tables, columns, relationships, existing measures)
 
 ### Actions
 
-1. **Analyze model context (token-efficient) via Power BI MCP**
-  - Use Power BI modeling MCP tools against `POWERBI_PBIX_PATH` to understand the model **without exporting full TMDL unless needed**:
-    - `model_operations.GetStats` to list tables, column counts, and measure counts.
-    - `measure_operations.List` per fact table to see existing measures.
-    - Optionally, `model_operations.ExportTMDL` with a small `maxReturnCharacters` only when necessary to disambiguate column names or data types.
-  - Combine this with structured outputs from the Redshift steps (roles, keys, relationships, and ETL grain comments) to identify:
-    - Fact vs dimension tables.
-    - Keys, foreign keys, numeric and date/status columns.
-2. **Create baseline measures for each fact table**
-  - For each fact table **that does not already have equivalent measures**:
-    - **Row count** – `COUNTROWS ( 'FactTable' )`
-    - **Distinct count of the main business key** – `DISTINCTCOUNT ( 'FactTable'[BusinessKey] )`
-  - For each **additive numeric column** (amount, quantity, cost, etc.):
-    - Create **SUM** measures.
-    - Where it adds value (e.g., continuous amounts), also create **AVG** measures.
+1. **Analyse model context (token-efficient) via Power BI MCP**
+   - `model_operations.GetStats` → list tables, column counts, measure counts
+   - `measure_operations.List` per fact table → see existing measures
+   - `model_operations.ExportTMDL` with small `maxReturnCharacters` only when needed to disambiguate column names or types
+   - Combine with structured outputs from Redshift steps (roles, keys, relationships, grain comments) to identify fact vs dimension tables, keys, numeric and date/status columns
+
+2. **Create baseline measures for each fact table** (only where equivalent measures don't already exist)
+   - Row count: `COUNTROWS ( 'FactTable' )`
+   - Distinct business key count: `DISTINCTCOUNT ( 'FactTable'[BusinessKey] )`
+   - For each additive numeric column (amount, quantity, cost): SUM measure; AVG measure where it adds analytical value
+
 3. **Derive business-focused KPIs from semantics**
-  - Use column names, data types, relationships, and grain (from the ETL design and model metadata) to infer business meaning and create KPIs such as:
-    - Per‑entity KPIs: revenue per customer, orders per customer, quantity per product, average order value.
-    - Ratio KPIs: conversion rates, share of total, % of active vs cancelled, etc.
-    - Time‑based KPIs (when a date column exists): MTD/QTD/YTD totals, prior period comparisons, growth percentages.
-  - Only create KPIs when the required base measures and columns **actually exist**; otherwise, explicitly skip and note why.
+   - Use column names, data types, relationships, and grain to infer business meaning and create KPIs such as:
+     - Per-entity KPIs: revenue per customer, orders per customer, average order value
+     - Ratio KPIs: conversion rates, share of total, % active vs cancelled
+     - Time-based KPIs (where a date column exists): MTD/QTD/YTD totals, prior period comparisons, growth %
+   - Only create KPIs when the required base measures and columns **actually exist**; otherwise skip and note why
+
 4. **Reuse and layer measures**
-  - Build complex KPIs on top of base measures instead of repeating logic:
-    - Example: `[Average Order Value] = DIVIDE ( [Total Amount], [Orders - Distinct Order Count] )`
-  - Use consistent naming patterns: `<Table> - <Metric>` or clearly business-oriented names.
-5. **Validate semantics and avoid hallucinations**
-  - Before calling `measure_operations.Create` via MCP, ensure:
-    - Referenced tables and columns exist in the model metadata.
-    - A measure with the same name does not already exist, or else update/skip instead of duplicating.
-  - After creation, re-`Get` or `List` measures to confirm DAX is valid (no semantic errors).
-  - Fix or remove any ambiguous or low‑value measures rather than keeping them.
+   - Build complex KPIs on top of base measures:
+     - Example: `[Average Order Value] = DIVIDE ( [Total Amount], [Orders - Distinct Order Count] )`
+   - Use consistent naming: `<Table> - <Metric>` or clearly business-oriented names
+
+5. **Validate semantics — no hallucinations**
+   - Before calling `measure_operations.Create`, confirm referenced tables and columns exist in model metadata and no measure with the same name already exists
+   - After creation, re-list measures to confirm DAX is valid
+   - Remove or fix any ambiguous or low-value measures
 
 ### Output
 
-- List of all created measures with their DAX expressions.
-- Measures organized by fact table.
+- List of all created measures with DAX expressions, grouped by fact table
 
 ### Completion Criteria
 
-- For **every fact table**:
-  - At minimum: a row count, a distinct business‑key count, and SUM/AVG measures for relevant numeric columns.
-  - At least **one high‑value KPI** that reflects the domain semantics (e.g., average order value, revenue per customer, etc.).
-- Measures are **derived from the actual model context** (not hard‑coded) and reference the correct tables/columns.
-- All DAX expressions validate successfully in Power BI.
-- Summary of created measures (grouped by fact table, with DAX) is provided to the user.
-
+For **every fact table**:
+- At minimum: row count, distinct business-key count, SUM/AVG for relevant numeric columns
+- At least **one high-value KPI** reflecting domain semantics
+- All DAX expressions validated successfully in Power BI
+- Summary of created measures (grouped by fact table, with DAX) provided to the user

@@ -1,11 +1,46 @@
+# ETL Step Summary Log
+_Auto-generated. Append only. Do not edit manually._
+
 ### Step Summary Log
 
-1. **Step 1 – Membership domain DDL and ETL**: Created `CREATE TABLE` definitions for `dim_individual`, `dim_company`, `dim_membership_type`, `dim_memberships`, and `fact_memberships` in `star_schema_full.sql`, and added initial `INSERT INTO ... SELECT` ETL logic for the membership domain using `ams_rem_crm_individual`, `ams_rem_crm_organization`, `ams_rem_crm_membershipbenefit`, and `ams_rem_shopping_membership` as sources, with TODO comments for unresolved mappings.
-2. **Step 2 – Event domain DDL and ETL**: Added `CREATE TABLE` definitions and initial ETL for `dim_event`, `fact_event_registrations`, `fact_event_sessions`, and `fact_event_purchases` in `star_schema_full.sql`, using `ams_rem_shopping_event`, `ams_rem_purchase_allregistrations`, and `ams_rem_purchase_registrationpurchase` as sources, with TODO comments where joins to other dimensions and measures remain to be refined.
-3. **Step 3 – Sales domain DDL and ETL**: Added `CREATE TABLE` definitions and initial ETL for `dim_sales_orders`, `dim_sales_lines`, `fact_sales_orders`, and `fact_sales_lines` in `star_schema_full.sql`, using `ams_rem_accounting_orders` and `ams_rem_accounting_lineitem` as sources, with quantity and date mappings wired and monetary, product, and key relationships left as TODOs for later refinement.
-4. **Step 4 – Email domain DDL and ETL skeletons**: Added `CREATE TABLE` definitions for `dim_campaign`, `dim_email`, `dim_email_sends`, `dim_email_opens`, `dim_email_clicks`, `dim_email_summaries`, and the email facts in `star_schema_full.sql`, with placeholder `INSERT` statements that default all columns to NULL and are guarded by `WHERE 1 = 0` pending identification of the actual email tracking source tables.
-5. **Step 5 – Remaining domains inventory**: Reviewed the target schema CSVs and identified remaining domains (Community, Sponsorships & Exhibits, Chapter Memberships, Web, Activities, and Core Shared Dimensions such as product, geography, and date/time), to be implemented next in the agreed domain order using the same DDL + ETL pattern.
-6. **Step 6 – Community domain DDL and ETL skeletons**: Added `CREATE TABLE` definitions for community facts and dimensions (`fact_community_activities`, `fact_community_discussion_posts`, `fact_community_discussions`, `fact_community_memberships`, `dim_community_activities`, `dim_community_discussion_posts`, `dim_community_discussions`, `dim_community_memberships`, `dim_community`) in `star_schema_full.sql`, with placeholder `INSERT` statements that set all columns to NULL and use `WHERE 1 = 0`, as no community-specific source tables were found in `erd.json`.
-7. **Step 7 – Sponsorships & Exhibits domain DDL and ETL**: Added `CREATE TABLE` definitions and ETL for `dim_sponsorships`, `dim_sponsorship`, `dim_exhibit`, `dim_exhibitor`, `fact_sponsorships`, `fact_event_exhibits`, and `fact_event_exhibit_purchases` in `star_schema_full.sql`, using `ams_rem_shopping_sponsorship`, `ams_rem_shopping_exhibit`, `ams_rem_shopping_exhibitionbooth`, and `ams_rem_purchase_exhibitorbooth` as sources where available, and leaving monetary amounts, product/event links, and some relationships as TODOs with NULL placeholders.
-8. **Step 8 – Chapter, Web, Activities, and core shared dimensions**: Completed DDL and skeleton ETL for the Chapter Memberships domain (`dim_chapter`, `fact_chapter_memberships`), Web domain (`dim_web_sessions`, `dim_web_pageviews`, `dim_web_page`, `fact_web_sessions`, `fact_web_pageviews`), Activities domain (`dim_activities`, `dim_activity_level`, `fact_activities`), and core shared dimensions (`dim_product`, `dim_location`, `dim_geography`, `dim_date`, `dim_time`, `dim_month`, `dim_year`) in `star_schema_full.sql`, using `INSERT` statements that currently default to NULL with `WHERE 1 = 0` and explicit TODO comments where no clear source mappings were identifiable from `erd.json`.
-
+1. [INIT:read-erd]          Read erd.json | source tables metadata loaded
+2. [INIT:read-eda]          Read eda.json | EDA profiling flags noted
+3. [INIT:read-columns]      Read redshift_schema_columns.csv | target tables and columns loaded
+4. [INIT:read-dimatrix]     Read redshift_schema_dimatrix.csv | fact-dim relationships loaded
+5. [INIT:read-config]       Read config.json | schemas and settings loaded
+6. [INIT:domain-plan]       Domain plan presented | awaiting user confirmation
+7. [INIT:confirmed]         Domain plan confirmed | proceeding to SQL generation
+8. [INIT:schema]            CREATE SCHEMA written | newmodel2
+45. [Web:dim-ddl]             dim_web_sessions/pageviews/page DDL written | 3 tables
+46. [Web:fact-ddl]            fact_web_sessions/pageviews DDL written | 2 tables
+47. [Web:dim-insert]          dim_web_sessions/pageviews/page INSERT written | WHERE 1=0 placeholders
+48. [Web:fact-insert]         fact_web_sessions/pageviews INSERT written | WHERE 1=0 placeholders
+49. [Web:done]                Domain complete | 5 DDL + 5 INSERT → star_schema_full.sql
+40. [Email:dim-ddl]         dim_email and email status dims DDL written | 5 tables
+41. [Email:fact-ddl]        email sends/opens/clicks/summaries facts DDL written | 4 tables
+42. [Email:dim-insert]      dim_email and email status dims INSERT written | WHERE 1=0 placeholders
+43. [Email:fact-insert]     email sends/opens/clicks/summaries facts INSERT written | WHERE 1=0 placeholders
+44. [Email:done]            Domain complete | 9 DDL + 9 INSERT → star_schema_full.sql
+35. [Sales:dim-ddl]           dim_sales_orders, dim_sales_lines DDL written | 2 tables
+36. [Sales:fact-ddl]          fact_sales_orders, fact_sales_lines DDL written | 2 tables
+22. [Events:fact-insert]     fact_event_registrations INSERT written | WHERE 1=0 unmapped placeholder
+23. [Events:fact-insert]     fact_event_sessions INSERT written | WHERE 1=0 unmapped placeholder
+24. [Events:fact-insert]     fact_event_purchases INSERT written | WHERE 1=0 unmapped placeholder
+25. [Events:fact-insert]     fact_event_exhibits INSERT written | WHERE 1=0 unmapped placeholder
+26. [Events:fact-insert]     fact_event_exhibit_purchases INSERT written | WHERE 1=0 unmapped placeholder
+27. [Events:done]            Domain complete | 11 DDL + 11 INSERT → star_schema_full.sql
+9. [Customers & Organizations:dim-ddl] dim_individual, dim_company DDL written | 2 tables
+10. [Customers & Organizations:dim-ddl] membership/product/activity dims DDL written | 7 tables
+11. [Customers & Organizations:fact-ddl] membership/chapter/activity facts DDL written | 3 tables
+12. [Customers & Organizations:dim-insert] dim_individual INSERT written | WARNING: low modeling_readiness
+13. [Customers & Organizations:dim-insert] dim_company INSERT written | WARNING: low modeling_readiness
+14. [Customers & Organizations:dim-insert] dim_membership_type INSERT written | derived entity flag
+15. [Customers & Organizations:dim-insert] dim_product INSERT written | TODOs for name/type/status
+16. [Customers & Organizations:dim-insert] activity/geography/date dims INSERT written | mix of derived and TODO
+17. [Customers & Organizations:fact-insert] membership/chapter facts INSERT written | WHERE 1=0 unmapped placeholder
+18. [Customers & Organizations:fact-insert] fact_activities INSERT written | 1 row per activity log
+19. [Customers & Organizations:done]      Domain complete | 10 DDL + 9 INSERT → star_schema_full.sql
+20. [Events:dim-ddl]         dim_event and event status dims DDL written | 6 tables
+21. [Events:fact-ddl]        event registration/session/purchase/exhibit facts DDL written | 5 tables
+7. [INIT:confirmed]         Domain plan confirmed | proceeding to SQL generation
+8. [INIT:schema]            CREATE SCHEMA written | newmodel2
