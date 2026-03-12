@@ -4,7 +4,7 @@
     "host": "a2-dev-cluster.cxynt5jzlg3q.us-east-1.redshift.amazonaws.com",
     "database": "ascaorg_5dfa73ba_dbb5_4ed8_bb79_b681eef92d1f",
     "schema": "source",
-    "generated_at": "2026-03-09T05:33:42.135899+00:00",
+    "generated_at": "2026-03-12T09:26:53.790992+00:00",
     "table_count": 121
   },
   "description": "Entity-Relationship Diagram \u2013 schemas and FK relationships",
@@ -24,7 +24,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isdeleted",
@@ -47,7 +48,11 @@
           "name": "businessunitid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_businessunit",
+            "references_column": "id"
+          }
         },
         {
           "name": "accounttype",
@@ -96,7 +101,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_businessunit",
+          "on_column": "businessunitid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_balance",
@@ -113,7 +125,8 @@
           "name": "accheaderid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "creditamount",
@@ -244,7 +257,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "closeddate",
@@ -326,7 +340,11 @@
           "name": "businessunitid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_businessunit",
+            "references_column": "id"
+          }
         },
         {
           "name": "periodid",
@@ -357,7 +375,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_businessunit",
+          "on_column": "businessunitid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_businessunit",
@@ -374,7 +399,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -463,7 +489,8 @@
           "name": "accheaderid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "batchdate",
@@ -505,7 +532,11 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "customerid",
@@ -572,7 +603,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_fiscalperiod",
@@ -589,7 +627,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -618,7 +657,11 @@
           "name": "businessunitid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_businessunit",
+            "references_column": "id"
+          }
         },
         {
           "name": "fiscalyearstartdate",
@@ -673,7 +716,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_businessunit",
+          "on_column": "businessunitid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_invoiceorder",
@@ -690,7 +740,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "voiddate",
@@ -780,13 +834,18 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "orderscheduleid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -798,7 +857,11 @@
           "name": "orderid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_orders",
+            "references_column": "orderid"
+          }
         },
         {
           "name": "billtocustomeraddressid",
@@ -847,7 +910,26 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_orders",
+          "on_column": "orderid",
+          "references": "orderid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_invoiceorderschedule",
@@ -912,13 +994,18 @@
           "name": "orderscheduleid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "orderid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_orders",
+            "references_column": "orderid"
+          }
         },
         {
           "name": "invoicenumber",
@@ -960,7 +1047,11 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -1021,7 +1112,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_orders",
+          "on_column": "orderid",
+          "references": "orderid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_ledger",
@@ -1068,7 +1172,11 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -1080,7 +1188,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "meta_date_added",
@@ -1099,7 +1208,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_lineitem",
@@ -1116,7 +1232,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "pricecode",
@@ -1176,7 +1293,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "createdon",
@@ -1273,7 +1394,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_lineitemamount",
@@ -1290,7 +1418,12 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitemdetail",
+            "references_column": "lineitemdetailid"
+          }
         },
         {
           "name": "productprice",
@@ -1578,7 +1711,12 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitemdetail",
+            "references_column": "lineitemdetailid"
+          }
         },
         {
           "name": "fiscalperiodid",
@@ -1639,7 +1777,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitemdetail",
+          "on_column": "id",
+          "references": "lineitemdetailid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitemdetail",
+          "on_column": "lineitemid",
+          "references": "lineitemdetailid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_lineitemdetail",
@@ -1656,7 +1807,12 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "pricename",
@@ -1722,7 +1878,8 @@
           "name": "lineitemdetailid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -1776,7 +1933,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "ordernumber",
@@ -1831,7 +1992,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "id",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_lineitemeducationcredit",
@@ -1848,7 +2022,12 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "declineddate",
@@ -1866,7 +2045,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "description",
@@ -1932,7 +2115,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_merchant",
@@ -1949,7 +2145,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "transactionkey",
@@ -2074,7 +2271,8 @@
           "name": "orderid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "ordernumber",
@@ -2146,7 +2344,11 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -2187,7 +2389,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "orderquickpaycode",
@@ -2212,7 +2418,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_payment",
@@ -2355,7 +2574,8 @@
           "name": "paymentscheduleid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -2367,7 +2587,11 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "paymentschedulenumber",
@@ -2379,7 +2603,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "billtocustomeraddressid",
@@ -2422,7 +2650,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_paymentmethod",
@@ -2439,7 +2680,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isdeleted",
@@ -2456,7 +2698,11 @@
           "name": "businessunitid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_businessunit",
+            "references_column": "id"
+          }
         },
         {
           "name": "name",
@@ -2474,7 +2720,11 @@
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "createdon",
@@ -2505,7 +2755,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_businessunit",
+          "on_column": "businessunitid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_accounting_refund",
@@ -2522,7 +2785,8 @@
           "name": "accheaderid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "businessunitname",
@@ -2576,13 +2840,21 @@
           "name": "batchid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_batch",
+            "references_column": "id"
+          }
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "versionstamp",
@@ -2649,7 +2921,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_batch",
+          "on_column": "batchid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_ai_commerce_context_cancellation_orders",
@@ -3281,7 +3566,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "category",
@@ -3329,7 +3618,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_award_award",
@@ -3346,7 +3642,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "nominationstartdate",
@@ -3398,13 +3695,21 @@
           "name": "categoryid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_award_category",
+            "references_column": "awardcategoryid"
+          }
         },
         {
           "name": "venueid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_venue",
+            "references_column": "id"
+          }
         },
         {
           "name": "fileid",
@@ -3459,7 +3764,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_award_category",
+          "on_column": "categoryid",
+          "references": "awardcategoryid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_venue",
+          "on_column": "venueid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_award_awardnomination",
@@ -3476,7 +3794,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "awardnote",
@@ -3511,7 +3830,11 @@
           "name": "awardid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_award_award",
+            "references_column": "id"
+          }
         },
         {
           "name": "nominatedbycustomerid",
@@ -3572,7 +3895,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_award_award",
+          "on_column": "awardid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_award_category",
@@ -3589,7 +3919,8 @@
           "name": "awardcategoryid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "awardcategorycode",
@@ -3660,19 +3991,28 @@
           "name": "awardjudgeid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "awardid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_award_award",
+            "references_column": "id"
+          }
         },
         {
           "name": "individualid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_individual",
+            "references_column": "id"
+          }
         },
         {
           "name": "createdon",
@@ -3714,7 +4054,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_award_award",
+          "on_column": "awardid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_individual",
+          "on_column": "individualid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_category",
@@ -3731,7 +4084,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -3839,7 +4193,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "rejoindate",
@@ -3893,7 +4248,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "productid",
@@ -3948,7 +4307,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_committee",
@@ -3965,7 +4331,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "rolerestrictiondate",
@@ -4000,7 +4367,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "code",
@@ -4060,7 +4431,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_committeemember",
@@ -4077,7 +4455,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "planyearshowindirectory",
@@ -4138,7 +4517,11 @@
           "name": "committeeid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_committee",
+            "references_column": "id"
+          }
         },
         {
           "name": "committeememberid",
@@ -4328,7 +4711,11 @@
           "name": "nominationstatusid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_committeenominationstatus",
+            "references_column": "id"
+          }
         },
         {
           "name": "committeeshowindirectory",
@@ -4370,7 +4757,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_committee",
+          "on_column": "committeeid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_committeenominationstatus",
+          "on_column": "nominationstatusid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_committeenominationstatus",
@@ -4387,7 +4787,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -4464,13 +4865,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "committeeid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_committee",
+            "references_column": "id"
+          }
         },
         {
           "name": "commiteepath",
@@ -4518,7 +4924,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_committee",
+          "on_column": "committeeid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_committeeposition",
@@ -4535,7 +4948,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isadmin",
@@ -4586,7 +5000,11 @@
           "name": "committeeid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_committee",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -4651,7 +5069,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_committee",
+          "on_column": "committeeid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_country",
@@ -4668,7 +5093,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "currencyid",
@@ -4774,7 +5200,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isdeleted",
@@ -4857,7 +5284,8 @@
           "name": "contactid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "oldid",
@@ -4963,7 +5391,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -4975,7 +5404,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "activity",
@@ -5023,7 +5456,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customeraddress",
@@ -5040,7 +5480,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "city",
@@ -5094,7 +5535,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "house",
@@ -5209,7 +5654,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customeralias",
@@ -5226,7 +5678,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -5249,7 +5702,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "alias",
@@ -5298,7 +5755,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customercategory",
@@ -5344,7 +5808,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "type",
@@ -5405,7 +5873,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerdescription",
@@ -5422,13 +5897,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "description",
@@ -5477,7 +5957,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerdiscipline",
@@ -5494,19 +5981,28 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "disciplineid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_discipline",
+            "references_column": "id"
+          }
         },
         {
           "name": "createdon",
@@ -5548,7 +6044,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_discipline",
+          "on_column": "disciplineid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customeremail",
@@ -5565,7 +6074,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -5600,7 +6110,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "isprimary",
@@ -5641,7 +6155,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerexpertise",
@@ -5658,19 +6179,28 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "expertiseid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_expertise",
+            "references_column": "id"
+          }
         },
         {
           "name": "createdon",
@@ -5712,7 +6242,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_expertise",
+          "on_column": "expertiseid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerimage",
@@ -5729,7 +6272,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -5741,7 +6285,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "imagefileid",
@@ -5788,7 +6336,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerjobrole",
@@ -5805,7 +6360,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isdeleted",
@@ -5822,7 +6378,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "rolecode",
@@ -5871,7 +6431,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerlanguage",
@@ -5888,13 +6455,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "name",
@@ -5942,7 +6514,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerlicense",
@@ -5959,13 +6538,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "licensetype",
@@ -6020,7 +6604,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerlink",
@@ -6037,7 +6628,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -6049,7 +6641,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "type",
@@ -6097,7 +6693,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customerphone",
@@ -6114,7 +6717,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -6143,7 +6747,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "isprimary",
@@ -6201,7 +6809,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customfieldvalue",
@@ -6218,7 +6833,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "valueguid",
@@ -6270,7 +6886,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "versionstamp",
@@ -6337,7 +6957,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_customfieldvaluelog",
@@ -6354,7 +6981,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "username",
@@ -6378,13 +7006,18 @@
           "name": "logid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "fieldname",
@@ -6439,7 +7072,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_degree",
@@ -6456,7 +7096,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "name",
@@ -6526,7 +7167,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -6620,7 +7262,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -6714,7 +7357,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "name",
@@ -6784,7 +7428,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "name",
@@ -6849,7 +7494,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -6861,7 +7507,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "firstname",
@@ -6909,7 +7559,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_inactivecertificants",
@@ -6926,7 +7583,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "certificationname",
@@ -6968,7 +7626,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "productid",
@@ -7023,7 +7685,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_inactivemembership",
@@ -7040,7 +7709,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "statusid",
@@ -7081,7 +7751,11 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -7099,13 +7773,21 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "productid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_membership",
+            "references_column": "id"
+          }
         },
         {
           "name": "joindate",
@@ -7154,7 +7836,26 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_membership",
+          "on_column": "productid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_individual",
@@ -7171,7 +7872,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "suffix",
@@ -7234,7 +7936,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "sourceid",
@@ -7246,7 +7952,11 @@
           "name": "currencyid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_currency",
+            "references_column": "id"
+          }
         },
         {
           "name": "prefcommunicationtype",
@@ -7372,7 +8082,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_currency",
+          "on_column": "currencyid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_individual_deleted",
@@ -7602,7 +8325,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -7649,13 +8373,21 @@
           "name": "individualid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_individual",
+            "references_column": "id"
+          }
         },
         {
           "name": "organizationid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_organization",
+            "references_column": "id"
+          }
         },
         {
           "name": "institution",
@@ -7667,7 +8399,11 @@
           "name": "degreeid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_degree",
+            "references_column": "id"
+          }
         },
         {
           "name": "graduationyear",
@@ -7679,7 +8415,11 @@
           "name": "majorfieldofstudyid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_fieldofstudy",
+            "references_column": "id"
+          }
         },
         {
           "name": "minorfieldofstudyid",
@@ -7704,7 +8444,32 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_individual",
+          "on_column": "individualid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_organization",
+          "on_column": "organizationid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_degree",
+          "on_column": "degreeid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_fieldofstudy",
+          "on_column": "majorfieldofstudyid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_individualdesignation",
@@ -7721,7 +8486,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isdeleted",
@@ -7738,7 +8504,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "name",
@@ -7787,7 +8557,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_license",
@@ -7804,7 +8581,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -7868,7 +8646,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "licensetypeisusedforcle",
@@ -7928,7 +8710,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_membershipbenefit",
@@ -7998,13 +8787,22 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "originallineitemid",
@@ -8028,7 +8826,8 @@
           "name": "membershipproductid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "membershipname",
@@ -8040,7 +8839,8 @@
           "name": "receivesbenefitsfromcustomerid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "effectivedate",
@@ -8077,7 +8877,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_membershiplog",
@@ -8094,7 +8907,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -8147,13 +8961,21 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "membershipproductid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_membership",
+            "references_column": "id"
+          }
         },
         {
           "name": "membershipname",
@@ -8188,7 +9010,11 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "meta_date_added",
@@ -8207,7 +9033,26 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_membership",
+          "on_column": "membershipproductid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_opportunity",
@@ -8224,7 +9069,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "productname",
@@ -8254,7 +9100,8 @@
           "name": "opportunitycontactid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "emailaddress",
@@ -8325,13 +9172,18 @@
           "name": "ownedbycustomerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "productid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "meta_date_added",
@@ -8350,7 +9202,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "ownedbycustomerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_organization",
@@ -8367,7 +9226,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "sourceid",
@@ -8379,7 +9239,11 @@
           "name": "currencyid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_currency",
+            "references_column": "id"
+          }
         },
         {
           "name": "prefcommunicationtype",
@@ -8420,7 +9284,11 @@
           "name": "contactid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "acronym",
@@ -8479,7 +9347,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_currency",
+          "on_column": "currencyid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "contactid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_organization_deleted",
@@ -8620,7 +9501,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -8762,7 +9644,12 @@
           "name": "contactid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "isdeleted",
@@ -8858,7 +9745,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "contactid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_room",
@@ -8875,7 +9769,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -8898,7 +9793,11 @@
           "name": "venueid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_venue",
+            "references_column": "id"
+          }
         },
         {
           "name": "name",
@@ -8947,7 +9846,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_venue",
+          "on_column": "venueid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_solicitationpermission",
@@ -8964,7 +9870,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -9053,7 +9960,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -9130,7 +10038,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -9267,7 +10176,11 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -9279,7 +10192,8 @@
           "name": "termid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "termpurchasestatusid",
@@ -9291,7 +10205,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "productid",
@@ -9340,7 +10258,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_tag",
@@ -9357,7 +10288,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "name",
@@ -9422,7 +10354,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "productid",
@@ -9452,13 +10385,21 @@
           "name": "tagid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_tag",
+            "references_column": "id"
+          }
         },
         {
           "name": "contactid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "createdon",
@@ -9500,7 +10441,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_tag",
+          "on_column": "tagid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "contactid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_crm_v2_relatedcontact",
@@ -9820,7 +10774,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "name",
@@ -9891,13 +10846,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "regionid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_region",
+            "references_column": "id"
+          }
         },
         {
           "name": "zip",
@@ -9945,7 +10905,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_region",
+          "on_column": "regionid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_exhibit_booth",
@@ -9962,7 +10929,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "boothprefix",
@@ -10186,7 +11154,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "unique_key",
@@ -10198,7 +11170,11 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "badgename",
@@ -10253,7 +11229,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_purchase_examscore",
@@ -10509,7 +11498,11 @@
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "quantity",
@@ -10564,7 +11557,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_purchase_registrationpurchase",
@@ -10610,13 +11610,21 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "lineitemid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_lineitem",
+            "references_column": "id"
+          }
         },
         {
           "name": "badgename",
@@ -10671,7 +11679,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_lineitem",
+          "on_column": "lineitemid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_booth",
@@ -10688,7 +11709,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "enddate",
@@ -10937,7 +11959,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "createdon",
@@ -10966,7 +11989,11 @@
           "name": "customerid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_customer",
+            "references_column": "contactid"
+          }
         },
         {
           "name": "correlationid",
@@ -11021,7 +12048,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_customer",
+          "on_column": "customerid",
+          "references": "contactid"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_contactservice",
@@ -11038,7 +12072,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -11115,13 +12150,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "shippingtype",
@@ -11237,7 +12277,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_event",
@@ -11254,13 +12301,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -11441,7 +12493,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_exam",
@@ -11458,7 +12517,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "enddate",
@@ -11475,7 +12535,11 @@
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -11606,7 +12670,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_exhibit",
@@ -11623,13 +12694,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -11805,7 +12881,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_exhibitionbooth",
@@ -11822,13 +12905,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "exhibitid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_exhibit",
+            "references_column": "id"
+          }
         },
         {
           "name": "hallcode",
@@ -11936,7 +13024,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_exhibit",
+          "on_column": "exhibitid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_fund",
@@ -11953,13 +13048,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "minamount",
@@ -12145,7 +13245,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_membership",
@@ -12162,13 +13269,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -12397,7 +13509,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_merchandise",
@@ -12414,13 +13533,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -12542,7 +13666,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_miscellaneous",
@@ -12559,13 +13690,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "issubstitute",
@@ -12674,7 +13810,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_price",
@@ -12691,7 +13834,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "ispublic",
@@ -12712,7 +13856,11 @@
           "name": "businessunitid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_businessunit",
+            "references_column": "id"
+          }
         },
         {
           "name": "accountsreceivableid",
@@ -12815,7 +13963,11 @@
           "name": "pricetypeid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_pricetype",
+            "references_column": "id"
+          }
         },
         {
           "name": "versionstamp",
@@ -12882,7 +14034,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_businessunit",
+          "on_column": "businessunitid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_pricetype",
+          "on_column": "pricetypeid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_pricesplit",
@@ -12928,7 +14093,11 @@
           "name": "priceid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_price",
+            "references_column": "id"
+          }
         },
         {
           "name": "splitpercent",
@@ -12983,7 +14152,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_price",
+          "on_column": "priceid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_pricetype",
@@ -13000,7 +14176,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "name",
@@ -13071,7 +14248,8 @@
           "name": "productid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "parentcategorycode",
@@ -13106,7 +14284,8 @@
           "name": "categorycode",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "categoryname",
@@ -13171,7 +14350,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "modifiedon",
@@ -13260,7 +14440,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "url",
@@ -13343,13 +14524,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -13471,7 +14657,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_registrationproductvenue",
@@ -13488,7 +14681,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "versionstamp",
@@ -13500,13 +14694,21 @@
           "name": "productid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_event",
+            "references_column": "id"
+          }
         },
         {
           "name": "venueid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_venue",
+            "references_column": "id"
+          }
         },
         {
           "name": "isprimary",
@@ -13547,7 +14749,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_event",
+          "on_column": "productid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_venue",
+          "on_column": "venueid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_service",
@@ -13564,7 +14779,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "isdeleted",
@@ -13653,7 +14869,8 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "capacity",
@@ -13835,13 +15052,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_paymentmethod",
+            "references_column": "id"
+          }
         },
         {
           "name": "shippingtype",
@@ -13941,7 +15163,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_paymentmethod",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_sponsorship",
@@ -13958,13 +15187,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -14070,7 +15304,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_subscription",
@@ -14087,13 +15328,18 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "merchantid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_accounting_merchant",
+            "references_column": "id"
+          }
         },
         {
           "name": "signaturetype",
@@ -14341,7 +15587,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_accounting_merchant",
+          "on_column": "merchantid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_shopping_track",
@@ -14358,13 +15611,19 @@
           "name": "id",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true
         },
         {
           "name": "sessionid",
           "type": "CHARACTER VARYING",
           "nullable": false,
-          "max_length": 1000
+          "max_length": 1000,
+          "primary_key": true,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_session",
+            "references_column": "id"
+          }
         },
         {
           "name": "eventname",
@@ -14447,7 +15706,11 @@
           "name": "eventid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_shopping_event",
+            "references_column": "id"
+          }
         },
         {
           "name": "meta_date_added",
@@ -14466,7 +15729,20 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_session",
+          "on_column": "sessionid",
+          "references": "id"
+        },
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_shopping_event",
+          "on_column": "eventid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_speaker_registrationproductspeaker",
@@ -14584,7 +15860,11 @@
           "name": "individualid",
           "type": "CHARACTER VARYING",
           "nullable": true,
-          "max_length": 1000
+          "max_length": 1000,
+          "foreign_key": {
+            "references_table": "ams_rem_crm_individual",
+            "references_column": "id"
+          }
         },
         {
           "name": "speakertypeid",
@@ -14632,7 +15912,14 @@
           "max_length": 1
         }
       ],
-      "relationships": []
+      "relationships": [
+        {
+          "type": "many-to-one",
+          "to_table": "ams_rem_crm_individual",
+          "on_column": "individualid",
+          "references": "id"
+        }
+      ]
     },
     {
       "name": "ams_rem_speaker_speakertype",

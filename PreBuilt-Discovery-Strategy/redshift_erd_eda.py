@@ -1,6 +1,6 @@
 """
-Redshift ERD + EDA Generator  (v3 – Maximum Optimization)
-==========================================================
+Redshift ERD + EDA Generator  (v4 – FK Fix)
+============================================
 Optimization history
 --------------------
 v1 (original) : 2×N queries per table  (one per column, twice)
@@ -12,9 +12,15 @@ v4 (this file): exponential backoff on retries + atomic JSON writes
                 + improved measure/dimension heuristic
                 + removed svv_table_info dependency; row count from Pass 1
                 + boolean columns cast safely in top-values query
+                + FIXED: build_erd now uses pg_constraint instead of
+                  information_schema.constraint_column_usage, which is
+                  unreliable in Redshift (FKs are unenforced / decorative).
+                  Split into 3 focused queries: columns, PKs, FKs.
+                  Also eliminates duplicate column rows caused by the
+                  original multi-JOIN approach.
 
 v3 optimizations over v2
-------------------------
+-------------------------
 1. PARALLEL TABLE PROFILING
    Tables are profiled concurrently using a thread pool (default 4 workers,
    configurable via "parallel_workers" in the config).  Wall-clock time drops
@@ -152,9 +158,6 @@ def new_cursor(conn):
     return conn.cursor()
 
 
-
-# ─────────────────────────────────────────────────────────────────────────────
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Dynamic worker calculation
 # ─────────────────────────────────────────────────────────────────────────────
@@ -186,7 +189,6 @@ def calc_optimal_workers(n_tables, wlm_slots, max_workers=None):
     WLM_slots caps us at Redshift's actual concurrency limit.
     max_workers is an optional hard ceiling from config.
     """
-    import math
     w = math.isqrt(n_tables)           # e.g. sqrt(121) = 11
     w = min(w, wlm_slots)              # never exceed Redshift's slot count
     w = max(w, 1)                      # always at least 1
@@ -195,10 +197,12 @@ def calc_optimal_workers(n_tables, wlm_slots, max_workers=None):
     return w
 
 
-# ERD
+# ─────────────────────────────────────────────────────────────────────────────
+# ERD  (v4 fix: pg_constraint replaces information_schema FK joins)
 # ─────────────────────────────────────────────────────────────────────────────
 
-ERD_SQL = """
+# Column metadata — no constraint info here to avoid duplicates
+COLUMNS_SQL = """
 SELECT
     c.table_name,
     c.column_name,
@@ -207,39 +211,88 @@ SELECT
     c.numeric_precision,
     c.numeric_scale,
     c.is_nullable,
-    c.ordinal_position,
-    tc.constraint_type,
-    ccu.table_name  AS referenced_table,
-    ccu.column_name AS referenced_column
+    c.ordinal_position
 FROM information_schema.columns c
-LEFT JOIN information_schema.key_column_usage kcu
-       ON kcu.table_schema = c.table_schema
-      AND kcu.table_name   = c.table_name
-      AND kcu.column_name  = c.column_name
-LEFT JOIN information_schema.table_constraints tc
-       ON tc.constraint_name = kcu.constraint_name
-      AND tc.table_schema    = c.table_schema
-LEFT JOIN information_schema.constraint_column_usage ccu
-       ON ccu.constraint_name = kcu.constraint_name
-      AND tc.constraint_type  = 'FOREIGN KEY'
 WHERE c.table_schema = %s
   AND c.table_name   IN ({placeholders})
 ORDER BY c.table_name, c.ordinal_position;
+"""
+
+# Primary keys via pg_constraint — always reliable in Redshift
+PK_SQL = """
+SELECT
+    t.relname  AS table_name,
+    a.attname  AS column_name
+FROM pg_constraint con
+JOIN pg_class     t ON t.oid = con.conrelid
+JOIN pg_namespace n ON n.oid = t.relnamespace
+JOIN pg_attribute a ON a.attrelid = t.oid AND a.attnum = ANY(con.conkey)
+WHERE con.contype = 'p'
+  AND n.nspname   = %s
+  AND t.relname   IN ({placeholders});
+"""
+
+# Foreign keys via pg_constraint.
+# NOTE: Redshift accepts FK syntax but does NOT enforce FK constraints.
+# information_schema.constraint_column_usage is therefore often empty.
+# pg_constraint (contype='f') is the only reliable source.
+FK_SQL = """
+SELECT
+    t.relname   AS table_name,
+    a.attname   AS column_name,
+    rt.relname  AS referenced_table,
+    ra.attname  AS referenced_column
+FROM pg_constraint con
+JOIN pg_class     t  ON t.oid  = con.conrelid
+JOIN pg_namespace n  ON n.oid  = t.relnamespace
+JOIN pg_attribute a  ON a.attrelid = t.oid  AND a.attnum = ANY(con.conkey)
+JOIN pg_class     rt ON rt.oid = con.confrelid
+JOIN pg_attribute ra ON ra.attrelid = rt.oid AND ra.attnum = ANY(con.confkey)
+WHERE con.contype = 'f'
+  AND n.nspname   = %s
+  AND t.relname   IN ({placeholders});
 """
 
 
 def build_erd(cursor, schema, tables):
     if not tables:
         return []
-    sql  = ERD_SQL.format(placeholders=", ".join(["%s"] * len(tables)))
-    rows = run_query(cursor, sql, (schema, *tables))
 
+    ph = ", ".join(["%s"] * len(tables))
+
+    # ── 1. Fetch columns ──────────────────────────────────────────────────
+    col_rows = run_query(
+        cursor,
+        COLUMNS_SQL.format(placeholders=ph),
+        (schema, *tables),
+    )
+
+    # ── 2. Fetch PKs and FKs from pg_constraint ───────────────────────────
+    pk_rows = run_query(cursor, PK_SQL.format(placeholders=ph), (schema, *tables))
+    fk_rows = run_query(cursor, FK_SQL.format(placeholders=ph), (schema, *tables))
+
+    # Fast lookups keyed by (table_name, column_name)
+    pk_cols = {(r["table_name"], r["column_name"]) for r in pk_rows}
+    fk_map  = {
+        (r["table_name"], r["column_name"]): {
+            "references_table":  r["referenced_table"],
+            "references_column": r["referenced_column"],
+        }
+        for r in fk_rows
+    }
+
+    # ── 3. Assemble ERD ───────────────────────────────────────────────────
     erd_tables = {}
-    for r in rows:
+    for r in col_rows:
         tname = r["table_name"]
         if tname not in erd_tables:
-            erd_tables[tname] = {"name": tname, "schema": schema,
-                                  "columns": [], "relationships": []}
+            erd_tables[tname] = {
+                "name":          tname,
+                "schema":        schema,
+                "columns":       [],
+                "relationships": [],
+            }
+
         col = {
             "name":     r["column_name"],
             "type":     r["data_type"].upper(),
@@ -251,21 +304,31 @@ def build_erd(cursor, schema, tables):
             col["precision"] = r["numeric_precision"]
             col["scale"]     = r["numeric_scale"]
 
-        ctype = r["constraint_type"]
-        if ctype == "PRIMARY KEY":
-            col["primary_key"] = True
-        elif ctype == "FOREIGN KEY":
-            col["foreign_key"] = {
-                "references_table":  r["referenced_table"],
-                "references_column": r["referenced_column"],
-            }
-        erd_tables[tname]["columns"].append(col)
+        key = (tname, r["column_name"])
 
-        if ctype == "FOREIGN KEY":
-            rel = {"type": "many-to-one", "to_table": r["referenced_table"],
-                   "on_column": r["column_name"]}
+        if key in pk_cols:
+            col["primary_key"] = True
+
+        if key in fk_map:
+            col["foreign_key"] = fk_map[key]
+            rel = {
+                "type":       "many-to-one",
+                "to_table":   fk_map[key]["references_table"],
+                "on_column":  r["column_name"],
+                "references": fk_map[key]["references_column"],
+            }
             if rel not in erd_tables[tname]["relationships"]:
                 erd_tables[tname]["relationships"].append(rel)
+
+        erd_tables[tname]["columns"].append(col)
+
+    # Guarantee every requested table appears even if it has no columns
+    for tname in tables:
+        if tname not in erd_tables:
+            erd_tables[tname] = {
+                "name": tname, "schema": schema,
+                "columns": [], "relationships": [],
+            }
 
     return list(erd_tables.values())
 
@@ -666,7 +729,7 @@ def get_all_tables(cursor, schema):
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Redshift ERD + EDA → JSON (v3 optimized)")
+        description="Redshift ERD + EDA → JSON (v4 – FK Fix)")
     parser.add_argument("--config", default=DEFAULT_CONFIG_FILE)
     args = parser.parse_args()
 
@@ -699,7 +762,7 @@ def main():
     # ── Dynamic worker selection ───────────────────────────────────────────
     wlm_slots = fetch_wlm_slots(cursor)
     workers   = calc_optimal_workers(len(tables), wlm_slots, cfg_max_workers)
-    print(f"⚙️   Workers: {workers} (sqrt({len(tables)})={__import__('math').isqrt(len(tables))}, WLM slots={wlm_slots}, cap={cfg_max_workers or 'none'})")
+    print(f"⚙️   Workers: {workers} (sqrt({len(tables)})={math.isqrt(len(tables))}, WLM slots={wlm_slots}, cap={cfg_max_workers or 'none'})")
 
     t0 = time.time()
 
